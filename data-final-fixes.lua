@@ -1,0 +1,1090 @@
+---------------------------------------------------------------------------------------------------
+---> data-final-fixes.lua <---
+---------------------------------------------------------------------------------------------------
+
+--- Contenedor de funciones y datos usados
+--- unicamente en este archivo
+local ThisMOD = {}
+
+---------------------------------------------------------------------------------------------------
+
+--- Iniciar el modulo
+function ThisMOD.Start()
+    --- Valores de la referencia
+    ThisMOD.setSetting()
+
+    --- Incluir las armas y las municiones
+    ThisMOD.addGunsAndAmmos()
+
+    --- Filtrar los elementos a ordenar
+    ThisMOD.getTarget()
+
+    --- Corregir lo filtrado
+    ThisMOD.CorrectTaget()
+
+    --- Eliminar los elementos duplicados - dejar el último
+    ThisMOD.OnlyLast()
+
+    --- Separar los filtros grandes
+    ThisMOD.SplitBigTaget()
+
+    --- Re-ordenar los subgroups
+    ThisMOD.SortSubgroups()
+
+    --- Re-ordenar los objetivos
+    ThisMOD.SortTarget()
+
+    --- Hacer algunas correciones
+    ThisMOD.Correct()
+
+    --- Agrupar las recetas
+    ThisMOD.GroupRecipes()
+end
+
+--- Valores de la referencia
+function ThisMOD.setSetting()
+    --- Prefijo de este MOD
+    ThisMOD.Prefix    = "zzzYAIM0425-0100-"
+
+    --- Renombrar la tabla
+    ThisMOD.Subgroups = data.raw["item-subgroup"]
+
+    --- Nueva organización
+    ThisMOD.NewSort   = {
+        ["logistics"] = {
+            ["storages"] = {
+                { type = "container", pattern = "chest" }
+            },
+            ["belts"] = {
+                { type = "transport-belt", pattern = "transport-belt" }
+            },
+            ["underground-belts"] = {
+                { type = "underground-belt", pattern = "underground-belt" }
+            },
+            ["splitters"] = {
+                { type = "splitter", pattern = "splitter" }
+            },
+            ["inserters"] = {
+                { type = "inserter", pattern = "inserter" }
+            },
+            ["container-1x1"] = {
+                { type = "container",          pattern = "steel-chest" },
+
+                { type = "logistic-container", pattern = "storage-chest" },
+                { type = "logistic-container", pattern = "passive-provider-chest" },
+                { type = "logistic-container", pattern = "requester-chest" },
+                { type = "logistic-container", pattern = "buffer-chest" },
+                { type = "logistic-container", pattern = "active-provider-chest" }
+            },
+            ["container-2x2"] = {
+                { type = "container",          pattern = "strongbox" },
+
+                { type = "logistic-container", pattern = "strongbox-storage" },
+                { type = "logistic-container", pattern = "strongbox-passive-provider" },
+                { type = "logistic-container", pattern = "strongbox-requester" },
+                { type = "logistic-container", pattern = "strongbox-buffer" },
+                { type = "logistic-container", pattern = "strongbox-active-provider" },
+
+                { type = "logistic-container", pattern = "storage-strongbox" },
+                { type = "logistic-container", pattern = "passive-provider-strongbox" },
+                { type = "logistic-container", pattern = "requester-strongbox" },
+                { type = "logistic-container", pattern = "buffer-strongbox" },
+                { type = "logistic-container", pattern = "active-provider-strongbox" }
+            },
+            ["container-4x4"] = {
+                { type = "container",          pattern = "storehouse" },
+
+                { type = "logistic-container", pattern = "storehouse-storage" },
+                { type = "logistic-container", pattern = "storehouse-passive-provider" },
+                { type = "logistic-container", pattern = "storehouse-requester" },
+                { type = "logistic-container", pattern = "storehouse-buffer" },
+                { type = "logistic-container", pattern = "storehouse-active-provider" }
+            },
+            ["container-6x6"] = {
+                { type = "container",          pattern = "warehouse" },
+
+                { type = "logistic-container", pattern = "warehouse-storage" },
+                { type = "logistic-container", pattern = "warehouse-passive-provider" },
+                { type = "logistic-container", pattern = "warehouse-requester" },
+                { type = "logistic-container", pattern = "warehouse-buffer" },
+                { type = "logistic-container", pattern = "warehouse-active-provider" },
+
+                { type = "logistic-container", pattern = "storage-warehouse" },
+                { type = "logistic-container", pattern = "passive-provider-warehouse" },
+                { type = "logistic-container", pattern = "requester-warehouse" },
+                { type = "logistic-container", pattern = "buffer-warehouse" },
+                { type = "logistic-container", pattern = "active-provider-warehouse" }
+            },
+            ["electric-system"] = {
+                { type = "electric-pole", pattern = "electric-pole" },
+                { type = "electric-pole", pattern = "substation" }
+            },
+            ["fluid-system"] = {
+                { type = "pipe",           pattern = "pipe" },
+                { type = "pipe-to-ground", pattern = "pipe-to-ground" },
+                { type = "storage-tank",   pattern = "micro-tank" },
+                { type = "storage-tank",   pattern = "storage-tank" },
+                { type = "pump",           pattern = "pump" }
+            },
+            ["railways"] = {
+                { type = "straight-rail",     pattern = "straight-rail" },
+                { type = "rail-ramp",         pattern = "rail-ramp" },
+                { type = "rail-support",      pattern = "rail-support" },
+                { type = "train-stop",        pattern = "train-stop" },
+                { type = "rail-signal",       pattern = "rail-signal" },
+                { type = "rail-chain-signal", pattern = "rail-chain-signal" }
+            },
+            ["locomotive-wagon"] = {
+                { type = "locomotive",      pattern = "locomotive" },
+                { type = "cargo-wagon",     pattern = "cargo-wagon" },
+                { type = "fluid-wagon",     pattern = "fluid-wagon" },
+                { type = "artillery-wagon", pattern = "artillery-wagon" }
+            },
+            ["transports"] = {
+                { type = "car",            pattern = "car" },
+                { type = "car",            pattern = "tank" },
+                { type = "spider-vehicle", pattern = "spidertron" },
+            },
+            ["logistic-network"] = {
+                { type = "roboport",           pattern = "roboport" },
+                { type = "logistic-robot",     pattern = "logistic-robot" },
+                { type = "construction-robot", pattern = "construction-robot" }
+            },
+            ["circuit-network"] = {
+                { type = "lamp",                  pattern = "small-lamp" },
+                { type = "arithmetic-combinator", pattern = "arithmetic-combinator" },
+                { type = "decider-combinator",    pattern = "decider-combinator" },
+                { type = "selector-combinator",   pattern = "selector-combinator" },
+                { type = "constant-combinator",   pattern = "constant-combinator" },
+                { type = "power-switch",          pattern = "power-switch" },
+                { type = "programmable-speaker",  pattern = "programmable-speaker" },
+                { type = "display-panel",         pattern = "display-panel" }
+            },
+            ["terrain-vanilla"] = {
+                { type = "tile", pattern = "stone-path" },
+                { type = "tile", pattern = "concrete" },
+                { type = "tile", pattern = "hazard-concrete" },
+                { type = "tile", pattern = "refined-concrete" },
+                { type = "tile", pattern = "refined-hazard-concrete" }
+            },
+            ["terrain-age"] = {
+                { type = "capsule", pattern = "cliff-explosives" },
+                { type = "tile",    pattern = "landfill" },
+                { type = "tile",    pattern = "artificial-yumako-soil" },
+                { type = "tile",    pattern = "overgrowth-yumako-soil" },
+                { type = "tile",    pattern = "artificial-jellynut-soil" },
+                { type = "tile",    pattern = "overgrowth-jellynut-soil" },
+                { type = "tile",    pattern = "ice-platform" },
+                { type = "tile",    pattern = "foundation" }
+            }
+        },
+        ["production"] = {
+            ["repair-tool"] = {
+                { type = "repair-tool", pattern = "repair-pack" }
+            },
+            ["steam-system"] = {
+                { type = "boiler",    name = "boiler" },
+                { type = "generator", pattern = "steam-engine" }
+            },
+            ["solar-system"] = {
+                { type = "solar-panel", pattern = "." },
+                { type = "accumulator", pattern = "accumulator" }
+            },
+            ["nucleare-system"] = {
+                { type = "reactor",   pattern = "nuclear-reactor" },
+                { type = "heat-pipe", pattern = "heat-pipe" },
+                { type = "boiler",    pattern = "heat-exchanger" },
+                { type = "generator", pattern = "steam-turbine" }
+            },
+            ["fusion-system"] = {
+                { type = "fusion-reactor",   pattern = "fusion-reactor" },
+                { type = "fusion-generator", pattern = "fusion-generator" }
+            },
+            ["lightning-attractor"] = {
+                { type = "lightning-attractor", pattern = "lightning-rod" },
+                { type = "lightning-attractor", pattern = "lightning-collector" }
+            },
+            ["mining-drills"] = {
+                { type = "mining-drill", pattern = "-drill" },
+                -- { type = "mining-drill", pattern = "mining-drill" },
+                { type = "mining-drill", pattern = "micro-miner" }
+            },
+            ["liquids-extractor"] = {
+                { type = "offshore-pump", pattern = "offshore-pump" },
+                { type = "mining-drill",  pattern = "pumpjack" }
+            },
+            ["furnaces"] = {
+                { type = "furnace", pattern = "furnace" }
+            },
+            ["varied-production"] = {
+                { type = "furnace",            pattern = "recycler" },
+                { type = "reactor",            pattern = "heating-tower" },
+                { type = "assembling-machine", pattern = "foundry" },
+                { type = "agricultural-tower", pattern = "agricultural-tower" },
+                { type = "assembling-machine", pattern = "biochamber" },
+                { type = "assembling-machine", pattern = "captive-biter-spawner" },
+                { type = "assembling-machine", pattern = "cryogenic-plant" }
+            },
+            ["assembling-machines"] = {
+                { type = "assembling-machine", pattern = "assembling-machine" },
+                { type = "assembling-machine", pattern = "electromagnetic-plant" },
+                { type = "assembling-machine", pattern = "micro-assembler" }
+            },
+            ["other-machines"] = {
+                { type = "assembling-machine", pattern = "oil-refinery" },
+                { type = "assembling-machine", pattern = "chemical-plant" },
+                { type = "assembling-machine", pattern = "centrifuge" },
+                { type = "assembling-machine", pattern = "micro-chemplant" }
+            },
+            ["labs"] = {
+                { type = "beacon", pattern = "beacon" },
+                { type = "lab",    pattern = "lab" },
+                { type = "lab",    pattern = "biolab" }
+            },
+            ["speed-modules"] = {
+                { type = "module", pattern = "speed-module" }
+            },
+            ["efficiency-modules"] = {
+                { type = "module", pattern = "efficiency-module" }
+            },
+            ["productivity-modules"] = {
+                { type = "module", pattern = "productivity-module" }
+            },
+            ["quality-modules"] = {
+                { type = "module", pattern = "quality-module" }
+            },
+            ["space"] = {
+                { type = "cargo-landing-pad", pattern = "cargo-landing-pad" },
+                { type = "rocket-silo",       pattern = "rocket-silo" },
+                { type = "item",              pattern = "satellite" }
+            }
+        },
+        ["intermediate-products"] = {
+            ["recipes-crude-oil"] = {
+                { type = "recipe", name = "basic-oil-processing" },
+                { type = "recipe", name = "advanced-oil-processing" },
+                { type = "recipe", name = "coal-liquefaction" },
+                { type = "recipe", name = "heavy-oil-cracking" },
+                { type = "recipe", name = "light-oil-cracking" },
+                { type = "recipe", name = "lubricant" },
+                { type = "recipe", name = "sulfuric-acid" }
+            },
+            ["raw-resource"] = {
+                { type = "item",    name = "wood" },
+                { type = "item",    name = "coal" },
+                { type = "item",    name = "stone" },
+                { type = "item",    name = "iron-ore" },
+                { type = "item",    name = "copper-ore" },
+                { type = "item",    name = "uranium-ore" },
+                { type = "capsule", name = "raw-fish" },
+                { type = "item",    name = "ice" }
+            },
+            ["raw-material"] = {
+                { type = "item", name = "iron-plate" },
+                { type = "item", name = "copper-plate" },
+                { type = "item", name = "steel-plate" },
+                { type = "item", name = "solid-fuel" },
+                { type = "item", name = "plastic-bar" },
+                { type = "item", name = "sulfur" },
+                { type = "item", name = "battery" },
+                { type = "item", name = "explosives" },
+                { type = "item", name = "carbon" }
+            },
+            ["recipes-empty-barrels"] = {
+                { type = "recipe", pattern = "empty-" }
+            },
+            ["barrels"] = {
+                { type = "item", pattern = "-barrel" }
+            },
+            ["products"] = {
+                { type = "item", name = "iron-gear-wheel" },
+                { type = "item", name = "iron-stick" },
+                { type = "item", name = "copper-cable" },
+                { type = "item", name = "barrel" },
+                { type = "item", name = "low-density-structure" },
+                { type = "item", name = "rocket-fuel" }
+            },
+            ["circuits"] = {
+                { type = "item", name = "electronic-circuit" },
+                { type = "item", name = "advanced-circuit" },
+                { type = "item", name = "processing-unit" },
+            },
+            ["engines"] = {
+                { type = "item", name = "engine-unit" },
+                { type = "item", name = "electric-engine-unit" },
+                { type = "item", name = "flying-robot-frame" },
+            },
+            ["uranium"] = {
+                { type = "item",   name = "uranium-235" },
+                { type = "item",   name = "uranium-238" },
+                { type = "item",   name = "uranium-fuel-cell" },
+                { type = "item",   name = "depleted-uranium-fuel-cell" },
+                { type = "item",   name = "nuclear-fuel" },
+                { type = "recipe", name = "nuclear-fuel-reprocessing" },
+                { type = "recipe", name = "uranium-processing" },
+                { type = "recipe", name = "kovarex-enrichment-process" }
+            },
+            ["vulcanus"] = {
+                { type = "item", name = "calcite" },
+                { type = "item", name = "tungsten-ore" },
+                { type = "item", name = "tungsten-carbide" },
+                { type = "item", name = "tungsten-plate" }
+            },
+            ["fulgora"] = {
+                { type = "item", name = "holmium-ore" },
+                { type = "item", name = "holmium-plate" },
+                { type = "item", name = "superconductor" },
+                { type = "item", name = "supercapacitor" }
+            },
+            ["gleba-agriculture"] = {
+                { type = "item", name = "yumako-seed" },
+                { type = "item", name = "jellynut-seed" },
+                { type = "item", name = "tree-seed" },
+                { type = "item", name = "yumako" },
+                { type = "item", name = "jellynut" },
+                { type = "item", name = "iron-bacteria" },
+                { type = "item", name = "copper-bacteria" },
+                { type = "item", name = "spoilage" },
+                { type = "item", name = "nutrients" }
+            },
+            ["gleba"] = {
+                { type = "item", name = "bioflux" },
+                { type = "item", name = "yumako-mash" },
+                { type = "item", name = "jelly" },
+                { type = "item", name = "carbon-fiber" },
+                { type = "item", name = "biter-egg" },
+                { type = "item", name = "pentapod-egg" }
+            },
+            ["aquilo"] = {
+                { type = "item", name = "lithium" },
+                { type = "item", name = "lithium-plate" },
+                { type = "item", name = "quantum-processor" },
+                { type = "item", name = "fusion-power-cell" }
+            },
+            ["science-pack-othres"] = {
+                { type = "tool", pattern = "-science-pack" }
+            },
+            ["science-pack-vanilla"] = {
+                { type = "tool", pattern = "automation-science-pack" },
+                { type = "tool", pattern = "logistic-science-pack" },
+                { type = "tool", pattern = "military-science-pack" },
+                { type = "tool", pattern = "chemical-science-pack" },
+                { type = "tool", pattern = "production-science-pack" },
+                { type = "tool", pattern = "utility-science-pack" },
+                { type = "tool", pattern = "space-science-pack" }
+            },
+            ["science-pack-space-age"] = {
+                { type = "tool", pattern = "metallurgic-science-pack" },
+                { type = "tool", pattern = "electromagnetic-science-pack" },
+                { type = "tool", pattern = "agricultural-science-pack" },
+                { type = "tool", pattern = "cryogenic-science-pack" },
+                { type = "tool", pattern = "promethium-science-pack" }
+            }
+        },
+        ["combat"] = {
+            ["entity"] = {
+                { type = "fluid-turret",    pattern = "." },
+                { type = "electric-turret", pattern = "." },
+                { type = "gate",            pattern = "." },
+                { type = "wall",            pattern = "." },
+                { type = "land-mine",       pattern = "." },
+                { type = "radar",           pattern = "." }
+            },
+            ["capsules"] = {
+                { type = "capsule", pattern = "grenade" },
+                { type = "capsule", pattern = "-capsule" }
+            },
+            ["armors"] = {
+                { type = "armor", pattern = "." }
+            },
+            ["energy-equipments"] = {
+                { type = "solar-panel-equipment", pattern = "." },
+                { type = "generator-equipment",   pattern = "." },
+                { type = "battery-equipment",     pattern = "." }
+            },
+            ["other-equipments"] = {
+                { type = "belt-immunity-equipment",   pattern = "." },
+                { type = "movement-bonus-equipment",  pattern = "." },
+                { type = "roboport-equipment",        pattern = "." },
+                { type = "night-vision-equipment",    pattern = "." },
+                { type = "inventory-bonus-equipment", pattern = "." }
+            },
+            ["combat-equipments"] = {
+                { type = "energy-shield-equipment",  pattern = "." },
+                { type = "active-defense-equipment", pattern = "." },
+                { type = "active-defense-equipment", pattern = "." }
+            }
+        },
+        ["fluids"] = {
+            ["vanilla"] = {
+                { type = "fluid", name = "water" },
+                { type = "fluid", name = "steam" },
+                { type = "fluid", name = "crude-oil" },
+                { type = "fluid", name = "heavy-oil" },
+                { type = "fluid", name = "light-oil" },
+                { type = "fluid", name = "lubricant" },
+                { type = "fluid", name = "petroleum-gas" },
+                { type = "fluid", name = "sulfuric-acid" }
+            },
+            ["spaceship"] = {
+                { type = "fluid", name = "thruster-fuel" },
+                { type = "fluid", name = "thruster-oxidizer" }
+            },
+            ["vulcanus"] = {
+                { type = "fluid", name = "lava" },
+                { type = "fluid", name = "molten-iron" },
+                { type = "fluid", name = "molten-copper" }
+            },
+            ["fulgora"] = {
+                { type = "fluid", name = "holmium-solution" },
+                { type = "fluid", name = "electrolyte" }
+            },
+            ["aquilo"] = {
+                { type = "fluid", name = "ammoniacal-solution" },
+                { type = "fluid", name = "ammonia" },
+                { type = "fluid", name = "fluorine" },
+                { type = "fluid", name = "fluoroketone-hot" },
+                { type = "fluid", name = "fluoroketone-cold" },
+                { type = "fluid", name = "lithium-brine" },
+                { type = "fluid", name = "fusion-plasma" }
+            }
+        }
+    }
+end
+
+---------------------------------------------------------------------------------------------------
+
+
+
+
+
+---------------------------------------------------------------------------------------------------
+
+--- Incluir las armas y las municiones
+function ThisMOD.addGunsAndAmmos()
+    --- Filtrar las municiones
+    local AmmosByType = {}
+    for _, Ammo in pairs(data.raw["ammo"]) do
+        local Type = AmmosByType[Ammo.ammo_category] or {}
+        AmmosByType[Ammo.ammo_category] = Type
+        table.insert(Type, Ammo)
+    end
+
+    --- Filtrar las armas
+    local GunsByType = {}
+    for _, Gun in pairs(GPrefix.Items) do
+        if Gun.attack_parameters and Gun.attack_parameters.ammo_category then
+            local ammo = Gun.attack_parameters
+            local Type = GunsByType[ammo.ammo_category] or {}
+            GunsByType[ammo.ammo_category] = Type
+            table.insert(Type, Gun)
+        end
+    end
+
+    --- Combinar armas y municiones, si es posible
+    local Ammos        = {} --- Municiones sin armas
+    local GunsAndAmmos = {} --- Municiones con armas
+    for AmmoCategory, Type in pairs(AmmosByType) do
+        --- Municiones con armas
+        if GunsByType[AmmoCategory] then
+            --- Crear el espacio
+            local Subgroup = GunsAndAmmos[AmmoCategory] or {}
+            GunsAndAmmos[AmmoCategory] = Subgroup
+
+            --- Agregar las armas
+            for _, weapon in pairs(GunsByType[AmmoCategory]) do
+                table.insert(Subgroup, { type = weapon.type, name = weapon.name })
+            end
+
+            --- Agregar las municiones
+            for _, ammo in pairs(Type) do
+                table.insert(Subgroup, { type = ammo.type, name = ammo.name })
+            end
+        end
+
+        --- Municiones sin armas
+        if not GunsByType[AmmoCategory] then
+            for _, ammo in pairs(Type) do
+                table.insert(Ammos, { type = ammo.type, name = ammo.name })
+            end
+        end
+    end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    --- Agregar la ametralladora
+    for _, Entity in pairs(data.raw["ammo-turret"]) do
+        if Entity.minable then
+            table.insert(GunsAndAmmos['bullet'], {
+                pattern = Entity.name,
+                type = Entity.type
+            })
+        end
+    end
+
+    --- Agregar la artilleria
+    GunsAndAmmos['artillery'] = {}
+    for _, Entity in pairs(data.raw["artillery-turret"]) do
+        if Entity.minable then
+            table.insert(GunsAndAmmos['artillery'], {
+                pattern = Entity.name,
+                type = Entity.type
+            })
+        end
+    end
+
+    --- Agregar la municiones para la artilleria
+    for i = #Ammos, 1, -1 do
+        if string.find(Ammos[i].name, "artillery") then
+            table.insert(GunsAndAmmos['artillery'], Ammos[i])
+            table.remove(Ammos, i)
+        end
+    end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    --- Actual orden de la sección
+    local Combat = {}
+    for key, Subgroups in pairs(ThisMOD.NewSort["combat"]) do
+        table.insert(Combat, Subgroups)
+        Subgroups.subgroup = key
+    end
+
+    --- Agregar el nuevo filtro
+    local Count = #Combat - 2
+    for key, value in pairs(GunsAndAmmos) do
+        value.subgroup = key
+        table.insert(Combat, #Combat - Count, value)
+    end
+    Ammos.subgroup = "other-ammo"
+    table.insert(Combat, #Combat - Count, Ammos)
+
+    --- Actualizar la sección
+    ThisMOD.NewSort["combat"] = {}
+    for _, Subgroups in pairs(Combat) do
+        local subgroups = ThisMOD.NewSort["combat"][Subgroups.subgroup] or {}
+        ThisMOD.NewSort["combat"][Subgroups.subgroup] = subgroups
+        Subgroups.subgroup = nil
+        for _, Filter in pairs(Subgroups) do
+            table.insert(subgroups, Filter)
+        end
+    end
+end
+
+--- Eliminar los subgroup vacios
+function ThisMOD.deleteEmptySubgroups()
+    --- Eliminar los subgroup vacios
+    for _, Subgroups in pairs(ThisMOD.newSort) do
+        local Remove = {}
+
+        --- Buscar los vacios
+        for key, value in pairs(Subgroups) do
+            if GPrefix.get_length(value) == 0 then
+                Remove[key] = true
+            end
+        end
+
+        --- Borrar los vacios
+        for key, _ in pairs(Remove) do
+            Subgroups[key] = nil
+        end
+    end
+end
+
+--- Filtrar los elementos a ordenar
+function ThisMOD.getTarget()
+    --- Contiene el resultado de los filtros
+    ThisMOD.newSort = {}
+
+    --- Aplicar los filtros
+    for Group, Subgroups in pairs(ThisMOD.NewSort) do
+        local group = ThisMOD.newSort[Group] or {}
+        ThisMOD.newSort[Group] = group
+        for key, Subgroup in pairs(Subgroups) do
+            local subgroup = group[key] or {}
+            group[key] = subgroup
+            for _, Filter in pairs(Subgroup) do
+                local i = #subgroup + 1
+                local filter = subgroup[i] or {}
+                subgroup[i] = filter
+
+                --- Filtro a usar
+                local pattern = Filter.pattern and string.gsub(Filter.pattern, "-", "%%-")
+                local name = Filter.name
+
+                --- Recorrer los elementos
+                for _, Elemet in pairs(data.raw[Filter.type] or {}) do
+                    if not Elemet.hidden then
+                        if pattern then
+                            --- Filtrar por patron
+                            if pattern ~= "." and string.find(Elemet.name, pattern) then
+                                table.insert(filter, Elemet)
+                            end
+                            --- Todo es valido
+                            if pattern == "." then
+                                table.insert(filter, Elemet)
+                            end
+                        end
+
+                        --- Filtrar por nombre
+                        if not pattern then
+                            if Elemet.name == name then
+                                table.insert(filter, Elemet)
+                            end
+                        end
+                    end
+                end
+
+                --- Sin resultado
+                if #filter == 0 then
+                    table.remove(subgroup, i)
+                end
+            end
+        end
+    end
+
+    --- Eliminar los subgroup vacios
+    ThisMOD.deleteEmptySubgroups()
+
+    --- Remplazar entidades por los objetos
+    for _, Subgroups in pairs(ThisMOD.newSort) do
+        for _, Subgroup in pairs(Subgroups) do
+            --- Elementos a eliminar
+            local iFilter = {}
+
+            --- Recorrer los filtros
+            for i, Filter in pairs(Subgroup) do
+                --- Elementos a eliminar
+                local jElement = {}
+
+                --- Convertir elementos
+                for j, Element in pairs(Filter) do
+                    --- Indicadores de busqueda
+                    local Find = false
+                    local Item = ""
+
+                    --- Buscar elementos
+                    if Element.minable and Element.minable.results then
+                        local result = Element.minable.results[1]
+                        Item = result.name
+                        Find = true
+                    elseif GPrefix.Equipments[Element.name] then
+                        Item = Element.name
+                        Find = true
+                    end
+
+                    --- Acción a tomar
+                    if Find then
+                        Item = GPrefix.Items[Item]
+                        if Item then Filter[j] = Item end
+                        if not Item then table.insert(jElement, 1, j) end
+                    end
+                end
+
+                --- Eliminar los elementos
+                for _, j in pairs(jElement) do
+                    table.remove(Filter, j)
+                end
+
+                --- Filtros a eliminar
+                if #Filter == 0 then
+                    table.insert(iFilter, 1, i)
+                end
+            end
+
+            --- Eliminar los elementos
+            for _, i in pairs(iFilter) do
+                table.remove(Subgroup, i)
+            end
+        end
+    end
+
+    --- Eliminar los subgroup vacios
+    ThisMOD.deleteEmptySubgroups()
+
+    --- Eliminar los elementos fuera del group
+    for Group, Subgroups in pairs(ThisMOD.newSort) do
+        for _, Subgroup in pairs(Subgroups) do
+            for _, Fiters in pairs(Subgroup) do
+                for i = #Fiters, 1, -1 do
+                    if Fiters[i].subgroup then
+                        local subgroup = ThisMOD.Subgroups[Fiters[i].subgroup]
+                        if subgroup.group ~= Group then
+                            table.remove(Fiters, i)
+                        end
+                    else
+                        table.remove(Fiters, i)
+                    end
+                end
+            end
+        end
+    end
+
+    --- Eliminar los subgroup vacios
+    ThisMOD.deleteEmptySubgroups()
+end
+
+--- Corregir lo filtrado
+function ThisMOD.CorrectTaget()
+    --- Enlistar los subgroups a corregir
+    local listKeys = {
+        { "logistics", "electric-system" },
+        { "combat",    "capsules" }
+    }
+
+    --- Hacer la corrección
+    for _, keys in pairs(listKeys) do
+        --- Subgroup a corregir
+        local Aux = ThisMOD.newSort
+        for _, key in pairs(keys) do
+            Aux = Aux[key] or {}
+        end
+
+        --- Validación
+        if #Aux < 2 then Aux = {} end
+
+        --- Mover de filtro
+        Count = #Aux
+        for _ = 2, Count, 1 do
+            for _, element in pairs(Aux[2]) do
+                table.insert(Aux[1], element)
+            end
+            table.remove(Aux, 2)
+        end
+    end
+end
+
+--- Eliminar los elementos duplicados - dejar el último
+function ThisMOD.OnlyLast()
+    --- Reordenar para buscar
+    local listSort = {}
+    for SubgroupsKey, Subgroups in pairs(ThisMOD.newSort) do
+        for SubgroupKey, Subgroup in pairs(Subgroups) do
+            for ElementsKey, Elements in pairs(Subgroup) do
+                for ElementKey, Element in pairs(Elements) do
+                    local Key = {
+                        SubgroupsKey,
+                        SubgroupKey,
+                        ElementsKey,
+                        ElementKey
+                    }
+
+                    table.insert(listSort, { keys = Key, value = Element })
+                end
+            end
+        end
+    end
+
+    --- Elementos a eliminar
+    local listDelete = { keys = {}, values = {} }
+
+    --- Buscar duplicados
+    Count = #listSort
+    for i = 1, Count - 1, 1 do
+        for j = i + 1, Count, 1 do
+            local iElement = listSort[i]
+            local jElement = listSort[j]
+            if iElement.value == jElement.value then
+                local keys = table.concat(iElement.keys, " > ")
+                if not GPrefix.get_key(listDelete.keys, keys) then
+                    listDelete.values[keys] = iElement.keys
+                    table.insert(listDelete.keys, keys)
+                end
+            end
+        end
+    end
+
+    --- Invertir el orden a eliminar
+    for i = #listDelete.keys, 1, -1 do
+        local key = listDelete.keys[i]
+        local value = listDelete.values[key]
+        table.insert(listDelete, value)
+    end
+    listDelete.values = nil
+    listDelete.keys = nil
+
+    --- Resultados afectados
+    local listValidate = { keys = {} }
+
+    --- Eliminar los duplicados
+    for _, keys in pairs(listDelete) do
+        local Aux = ThisMOD.newSort
+        for i = 1, 3, 1 do
+            Aux = Aux[keys[i]]
+        end
+        table.remove(Aux, keys[4])
+
+        table.remove(keys)
+        local key = table.concat(keys, " > ")
+        if not GPrefix.get_key(listValidate.keys, key) then
+            table.insert(listValidate.keys, key)
+            table.insert(listValidate, keys)
+        end
+    end
+    listValidate.keys = nil
+
+    --- Eliminar los resultados vacios
+    for _, keys in pairs(listValidate) do
+        local Aux = ThisMOD.newSort
+        for i = 1, 2, 1 do
+            Aux = Aux[keys[i]]
+        end
+
+        if #Aux[keys[3]] == 0 then
+            table.remove(Aux, keys[3])
+        end
+    end
+
+    --- Eliminar los subgroup vacios
+    ThisMOD.deleteEmptySubgroups()
+end
+
+--- Separar los filtros grandes
+function ThisMOD.SplitBigTaget()
+    --- Reordenar para buscar
+    local listSort = {}
+    for SubgroupsKey, Subgroups in pairs(ThisMOD.newSort) do
+        for SubgroupKey, Subgroup in pairs(Subgroups) do
+            for ElementsKey, Elements in pairs(Subgroup) do
+                local Key = {
+                    SubgroupsKey,
+                    SubgroupKey,
+                    ElementsKey
+                }
+
+                table.insert(listSort, { keys = Key, value = Elements })
+            end
+        end
+    end
+
+    --- Elimentos retirados
+    local listValidate = {}
+
+    --- Buscar en los resultados de los filtros
+    Count = #listSort
+    repeat
+        --- Renombrar
+        local Filtro = listSort[Count]
+        local Aux = ThisMOD.newSort
+        Aux = Aux[Filtro.keys[1]]
+        Aux = Aux[Filtro.keys[2]]
+
+        --- Evaluar el tamaño
+        if #Filtro.value > 2 and #Aux > 1 then
+            --- Crear los contenedores
+            local Group = listValidate[Filtro.keys[1]] or {}
+            listValidate[Filtro.keys[1]] = Group
+
+            local Subgroup = Group[Filtro.keys[2]] or {}
+            Group[Filtro.keys[2]] = Subgroup
+
+            --- Guardar el filtro
+            table.insert(Subgroup, 1, Filtro.value)
+            table.remove(Aux, Filtro.keys[3])
+        end
+
+        --- Continuar la evaluación
+        Count = Count - 1
+    until Count <= 0
+
+    --- Agregar los nuevos subgroups
+    for GroupName, Subgroups in pairs(listValidate) do
+        local NewGroup = {}
+        for key, value in pairs(ThisMOD.newSort[GroupName]) do
+            --- Posicionar los nuevos subgroups
+            if Subgroups[key] then
+                table.insert(NewGroup, { name = key .. "-1", value = value })
+                for i = 1, #Subgroups[key], 1 do
+                    table.insert(NewGroup, {
+                        name = key .. "-" .. i + 1,
+                        value = { Subgroups[key][i] }
+                    })
+                end
+            end
+
+            --- Subgroups sin cambios
+            if not Subgroups[key] then
+                table.insert(NewGroup, { name = key, value = value })
+            end
+        end
+
+        --- Agregar los nuevos subgroups
+        local newGroup = {}
+        ThisMOD.newSort[GroupName] = newGroup
+        for _, Subgroup in pairs(NewGroup) do
+            newGroup[Subgroup.name] = Subgroup.value
+        end
+    end
+
+    --- Eliminar los subgroup vacios
+    ThisMOD.deleteEmptySubgroups()
+end
+
+--- Re-ordenar los subgroups
+function ThisMOD.SortSubgroups()
+    --- Agrupar los veijos subgroups
+    local oldGroup = {}
+    for group, _ in pairs(ThisMOD.newSort) do
+        local Group = oldGroup[group] or {}
+        oldGroup[group] = Group
+        for _, subgroup in pairs(data.raw["item-subgroup"]) do
+            if subgroup.group == group then
+                Group[tonumber(subgroup.order) / 10] = subgroup
+            end
+        end
+    end
+
+    --- Crear y agrupar los nuevos subgroups
+    local newGroup = {}
+    for group, subgroups in pairs(ThisMOD.newSort) do
+        local Group = newGroup[group] or {}
+        newGroup[group] = Group
+        for subgroup, _ in pairs(subgroups) do
+            local newSubgroup = {
+                type = "item-subgroup",
+                group = group,
+                order = #Group + 1 .. "",
+                name = ThisMOD.Prefix .. subgroup
+            }
+            table.insert(Group, newSubgroup)
+            GPrefix.addDataRaw({ newSubgroup })
+        end
+    end
+
+    --- Reordenar los nuevos subgroups
+    for group, subgroups in pairs(newGroup) do
+        local Digits = #oldGroup[group]
+        Digits = Digits + #newGroup[group]
+        Digits = GPrefix.digit_count(Digits) + 1
+
+        for key, subgroup in pairs(subgroups) do
+            subgroup.order = GPrefix.pad_left(Digits, key) .. "0"
+        end
+    end
+
+    --- Reordenar los viejos subgroups
+    for group, subgroups in pairs(oldGroup) do
+        local Digits = #oldGroup[group]
+        Digits = Digits + #newGroup[group]
+        Digits = GPrefix.digit_count(Digits) + 1
+
+        Count = #newGroup[group]
+
+        for key, subgroup in pairs(subgroups) do
+            subgroup.order = GPrefix.pad_left(Digits, Count + key) .. "0"
+        end
+    end
+end
+
+--- Re-ordenar los objetivos
+function ThisMOD.SortTarget()
+    --- Cambiar los orders para ordenarlo luego
+    for _, Subgroups in pairs(ThisMOD.newSort) do
+        for _, Subgroup in pairs(Subgroups) do
+            for i, Elements in pairs(Subgroup) do
+                for _, Element in pairs(Elements) do
+                    if Element.subgroup then
+                        Element.order = Element.order or ""
+                        local newOrder = Element.subgroup
+                        newOrder = ThisMOD.Subgroups[newOrder].order
+                        newOrder = newOrder .. "-"
+                        newOrder = newOrder .. GPrefix.pad_left(2, i) .. "-"
+                        newOrder = newOrder .. Element.order
+                        Element.order = newOrder
+                    end
+                end
+            end
+        end
+    end
+
+    --- Ordenar los elementos
+    for _, Subgroups in pairs(ThisMOD.newSort) do
+        for Name, Elements in pairs(Subgroups) do
+            --- Contenedor temporal
+            local NewOrder = {}
+            local NewSort = {}
+
+            --- Obtener los orders
+            for _, Subgroup in pairs(Elements) do
+                for _, Element in pairs(Subgroup) do
+                    if Element.subgroup then
+                        NewSort[Element.order] = Element
+                        table.insert(NewOrder, Element.order)
+                    end
+                end
+            end
+
+            --- Ordenar
+            table.sort(NewOrder)
+
+            --- Establecer el nuevo order
+            local newSubgroup = {}
+            Subgroups[Name] = newSubgroup
+            for _, order in pairs(NewOrder) do
+                table.insert(newSubgroup, NewSort[order])
+            end
+        end
+    end
+
+    --- Actualizar el order
+    for _, subgroups in pairs(ThisMOD.newSort) do
+        for subgroup, elements in pairs(subgroups) do
+            local Digits = GPrefix.digit_count(#elements) + 1
+            for key, element in pairs(elements) do
+                element.subgroup = ThisMOD.Prefix .. subgroup
+                element.order = GPrefix.pad_left(Digits, key) .. "0"
+            end
+        end
+    end
+end
+
+--- Hacer algunas correciones
+function ThisMOD.Correct()
+    --- Ocultar las recetas para vaciar los barriles
+    local RecipesEmptyBarrels = ThisMOD.newSort["intermediate-products"]
+    RecipesEmptyBarrels = RecipesEmptyBarrels["recipes-empty-barrels"]
+    for _, Recipe in pairs(RecipesEmptyBarrels) do
+        Recipe.subgroup = ThisMOD.subgroup
+        Recipe.allow_decomposition = false
+        Recipe.hide_from_signal_gui = false
+        Recipe.hide_from_player_crafting = true
+        Recipe.factoriopedia_alternative = 'barrel'
+    end
+
+    --- Eliminar subgroup y order
+    for _, Entity in pairs(data.raw['combat-robot']) do
+        Entity.subgroup = nil
+        Entity.order = nil
+    end
+end
+
+--- Agrupar las recetas
+function ThisMOD.GroupRecipes()
+    for Name, Recipes in pairs(GPrefix.Recipes) do
+        local Item = GPrefix.Items[Name]
+        if Item then
+            Item.order = Item.order or "0"
+            local NewOrder = tonumber(Item.order) or 0
+            for _, Recipe in pairs(Recipes) do
+                if #Recipe.results == 1 then
+                    Recipe.subgroup = Item.subgroup
+                    Recipe.order    = GPrefix.pad_left(#Item.order, NewOrder)
+                    NewOrder        = NewOrder + 1
+                end
+            end
+        end
+    end
+end
+
+---------------------------------------------------------------------------------------------------
+
+
+
+
+
+---------------------------------------------------------------------------------------------------
+
+--- Iniciar el modulo
+ThisMOD.Start()
+
+---------------------------------------------------------------------------------------------------
