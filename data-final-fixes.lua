@@ -472,11 +472,11 @@ end
 function This_MOD.set_format()
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
-    This_MOD.last_format = {}
+    This_MOD.after_format = {}
     for group_name, subgroups in pairs(This_MOD.new_sort) do
         --- --- --- --- --- --- --- --- --- --- --- --- ---
         local Space = { name = group_name }
-        table.insert(This_MOD.last_format, Space)
+        table.insert(This_MOD.after_format, Space)
         --- --- --- --- --- --- --- --- --- --- --- --- ---
         for subgroup_name, subgroup in pairs(subgroups) do
             subgroup = util.copy(subgroup)
@@ -1117,7 +1117,7 @@ end
 
 --- Iniciar el modulo
 This_MOD.start()
-GPrefix.var_dump(This_MOD.last_format)
+GPrefix.var_dump(This_MOD.after_format)
 ERROR()
 
 ---------------------------------------------------------------------------------------------------
