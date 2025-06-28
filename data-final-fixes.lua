@@ -594,14 +594,14 @@ function This_MOD.order_guns_and_ammos()
     ---> Agregar los nuevos filtros
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
-    local Combat = GPrefix.get_table(This_MOD.after_format, "name", "combat")
-    local Count = #Combat - 2
+    local combat = GPrefix.get_table(This_MOD.after_format, "name", "combat")
+    local count = #combat - 2
     for key, value in pairs(guns_and_ammos) do
         value.subgroup = key
-        table.insert(Combat, #Combat - Count, value)
+        table.insert(combat, #combat - count, value)
     end
     ammos.subgroup = "other-ammo"
-    table.insert(Combat, #Combat - Count, ammos)
+    table.insert(combat, #combat - count, ammos)
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
