@@ -595,7 +595,7 @@ function This_MOD.order_guns_and_ammos()
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
     local combat = GPrefix.get_table(This_MOD.after_format, "name", "combat")
-    local count = #combat - 2
+    local count = #combat - 2 -- 2 Posicion del subgroup
     for key, value in pairs(guns_and_ammos) do
         value.subgroup = key
         table.insert(combat, #combat - count, value)
