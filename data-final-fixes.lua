@@ -56,8 +56,8 @@ function This_MOD.setting_mod()
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
     --- Nueva organización según cada grupo
-    This_MOD.new_sort = {}
-    This_MOD.new_sort["logistics"] = {
+    This_MOD.new_order = {}
+    This_MOD.new_order["logistics"] = {
         ["storages"] = {
             { type = "container", pattern = "chest" }
         },
@@ -184,7 +184,7 @@ function This_MOD.setting_mod()
             { type = "tile",    pattern = "foundation" }
         }
     }
-    This_MOD.new_sort["production"] = {
+    This_MOD.new_order["production"] = {
         ["repair-tool"] = {
             { type = "repair-tool", pattern = "repair-pack" }
         },
@@ -265,7 +265,7 @@ function This_MOD.setting_mod()
             { type = "item",              pattern = "satellite" }
         }
     }
-    This_MOD.new_sort["intermediate-products"] = {
+    This_MOD.new_order["intermediate-products"] = {
         ["recipes-crude-oil"] = {
             { type = "recipe", name = "basic-oil-processing" },
             { type = "recipe", name = "advanced-oil-processing" },
@@ -387,7 +387,7 @@ function This_MOD.setting_mod()
             { type = "tool", pattern = "promethium-science-pack" }
         }
     }
-    This_MOD.new_sort["combat"] = {
+    This_MOD.new_order["combat"] = {
         ["entity"] = {
             { type = "fluid-turret",    pattern = "." },
             { type = "electric-turret", pattern = "." },
@@ -421,7 +421,7 @@ function This_MOD.setting_mod()
             { type = "active-defense-equipment", pattern = "." }
         }
     }
-    This_MOD.new_sort["fluids"] = {
+    This_MOD.new_order["fluids"] = {
         ["vanilla"] = {
             { type = "fluid", name = "water" },
             { type = "fluid", name = "steam" },
@@ -473,7 +473,7 @@ function This_MOD.set_format()
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
     This_MOD.after_format = {}
-    for group_name, subgroups in pairs(This_MOD.new_sort) do
+    for group_name, subgroups in pairs(This_MOD.new_order) do
         --- --- --- --- --- --- --- --- --- --- --- --- ---
         local Space = { name = group_name }
         table.insert(This_MOD.after_format, Space)
@@ -576,7 +576,7 @@ function This_MOD.addGunsAndAmmos()
 
     --- Actual orden de la sección
     local Combat = {}
-    for key, Subgroups in pairs(This_MOD.new_sort["combat"]) do
+    for key, Subgroups in pairs(This_MOD.new_order["combat"]) do
         table.insert(Combat, Subgroups)
         Subgroups.subgroup = key
     end
@@ -591,10 +591,10 @@ function This_MOD.addGunsAndAmmos()
     table.insert(Combat, #Combat - Count, Ammos)
 
     --- Actualizar la sección
-    This_MOD.new_sort["combat"] = {}
+    This_MOD.new_order["combat"] = {}
     for _, Subgroups in pairs(Combat) do
-        local subgroups = This_MOD.new_sort["combat"][Subgroups.subgroup] or {}
-        This_MOD.new_sort["combat"][Subgroups.subgroup] = subgroups
+        local subgroups = This_MOD.new_order["combat"][Subgroups.subgroup] or {}
+        This_MOD.new_order["combat"][Subgroups.subgroup] = subgroups
         Subgroups.subgroup = nil
         for _, Filter in pairs(Subgroups) do
             table.insert(subgroups, Filter)
@@ -628,7 +628,7 @@ function This_MOD.getTarget()
     This_MOD.newSort = {}
 
     --- Aplicar los filtros
-    for Group, Subgroups in pairs(This_MOD.new_sort) do
+    for Group, Subgroups in pairs(This_MOD.new_order) do
         local group = This_MOD.newSort[Group] or {}
         This_MOD.newSort[Group] = group
         for key, Subgroup in pairs(Subgroups) do
