@@ -18,35 +18,36 @@ function This_MOD.start()
     --- Valores de la referencia
     This_MOD.setting_mod()
 
-    --- Darle un formato que facilite el manejor a lo largo de este mod
+    --- Darle un formato que facilite el manejor
+    --- a lo largo de este mod
     This_MOD.set_format()
 
-    -- --- Incluir las armas y las municiones
-    -- ThisMOD.addGunsAndAmmos()
+    --- Incluir las armas y las municiones
+    This_MOD.order_guns_and_ammos()
 
     -- --- Filtrar los elementos a ordenar
-    -- ThisMOD.getTarget()
+    -- This_MOD.getTarget()
 
     -- --- Corregir lo filtrado
-    -- ThisMOD.CorrectTaget()
+    -- This_MOD.CorrectTaget()
 
     -- --- Eliminar los elementos duplicados - dejar el último
-    -- ThisMOD.OnlyLast()
+    -- This_MOD.OnlyLast()
 
     -- --- Separar los filtros grandes
-    -- ThisMOD.SplitBigTaget()
+    -- This_MOD.SplitBigTaget()
 
     -- --- Re-ordenar los subgroups
-    -- ThisMOD.SortSubgroups()
+    -- This_MOD.SortSubgroups()
 
     -- --- Re-ordenar los objetivos
-    -- ThisMOD.SortTarget()
+    -- This_MOD.SortTarget()
 
     -- --- Hacer algunas correciones
-    -- ThisMOD.Correct()
+    -- This_MOD.Correct()
 
     -- --- Agrupar las recetas
-    -- ThisMOD.GroupRecipes()
+    -- This_MOD.GroupRecipes()
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
@@ -489,75 +490,85 @@ function This_MOD.set_format()
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
 
----------------------------------------------------------------------------------------------------
-
 --- Incluir las armas y las municiones
-function This_MOD.addGunsAndAmmos()
+function This_MOD.order_guns_and_ammos()
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    ---> Municiones y armas
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
     --- Filtrar las municiones
-    local AmmosByType = {}
-    for _, Ammo in pairs(data.raw["ammo"]) do
-        local Type = AmmosByType[Ammo.ammo_category] or {}
-        AmmosByType[Ammo.ammo_category] = Type
-        table.insert(Type, Ammo)
+    local ammos_by_type = {}
+    for _, ammo in pairs(data.raw["ammo"]) do
+        local Type = ammos_by_type[ammo.ammo_category] or {}
+        ammos_by_type[ammo.ammo_category] = Type
+        table.insert(Type, ammo)
     end
 
     --- Filtrar las armas
-    local GunsByType = {}
-    for _, Gun in pairs(GPrefix.Items) do
-        if Gun.attack_parameters and Gun.attack_parameters.ammo_category then
-            local ammo = Gun.attack_parameters
-            local Type = GunsByType[ammo.ammo_category] or {}
-            GunsByType[ammo.ammo_category] = Type
-            table.insert(Type, Gun)
+    local guns_by_type = {}
+    for _, gun in pairs(GPrefix.Items) do
+        local ammo = gun.attack_parameters and gun.attack_parameters.ammo_category or nil
+        if ammo then
+            local type = guns_by_type[ammo] or {}
+            guns_by_type[ammo] = type
+            table.insert(type, gun)
         end
     end
 
     --- Combinar armas y municiones, si es posible
-    local Ammos        = {} --- Municiones sin armas
-    local GunsAndAmmos = {} --- Municiones con armas
-    for AmmoCategory, Type in pairs(AmmosByType) do
+    local ammos = {} --- Municiones sin armas
+    local guns_and_ammos = {} --- Municiones con armas
+    for ammo_category, type in pairs(ammos_by_type) do
         --- Municiones con armas
-        if GunsByType[AmmoCategory] then
+        if guns_by_type[ammo_category] then
             --- Crear el espacio
-            local Subgroup = GunsAndAmmos[AmmoCategory] or {}
-            GunsAndAmmos[AmmoCategory] = Subgroup
+            local subgroup = guns_and_ammos[ammo_category] or {}
+            guns_and_ammos[ammo_category] = subgroup
 
             --- Agregar las armas
-            for _, weapon in pairs(GunsByType[AmmoCategory]) do
-                table.insert(Subgroup, { type = weapon.type, name = weapon.name })
+            for _, weapon in pairs(guns_by_type[ammo_category]) do
+                table.insert(subgroup, { type = weapon.type, name = weapon.name })
             end
 
             --- Agregar las municiones
-            for _, ammo in pairs(Type) do
-                table.insert(Subgroup, { type = ammo.type, name = ammo.name })
+            for _, ammo in pairs(type) do
+                table.insert(subgroup, { type = ammo.type, name = ammo.name })
             end
         end
 
         --- Municiones sin armas
-        if not GunsByType[AmmoCategory] then
-            for _, ammo in pairs(Type) do
-                table.insert(Ammos, { type = ammo.type, name = ammo.name })
+        if not guns_by_type[ammo_category] then
+            for _, ammo in pairs(type) do
+                table.insert(ammos, { type = ammo.type, name = ammo.name })
             end
         end
     end
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    ---> Agregar municiones y entidades
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
     --- Agregar la ametralladora
-    for _, Entity in pairs(data.raw["ammo-turret"]) do
-        if Entity.minable then
-            table.insert(GunsAndAmmos['bullet'], {
-                pattern = Entity.name,
-                type = Entity.type
+    for _, entity in pairs(data.raw["ammo-turret"]) do
+        if entity.minable then
+            table.insert(guns_and_ammos['bullet'], {
+                pattern = entity.name,
+                type = entity.type
             })
         end
     end
 
     --- Agregar la artilleria
-    GunsAndAmmos['artillery'] = {}
+    guns_and_ammos['artillery'] = {}
     for _, Entity in pairs(data.raw["artillery-turret"]) do
         if Entity.minable then
-            table.insert(GunsAndAmmos['artillery'], {
+            table.insert(guns_and_ammos['artillery'], {
                 pattern = Entity.name,
                 type = Entity.type
             })
@@ -565,42 +576,37 @@ function This_MOD.addGunsAndAmmos()
     end
 
     --- Agregar la municiones para la artilleria
-    for i = #Ammos, 1, -1 do
-        if string.find(Ammos[i].name, "artillery") then
-            table.insert(GunsAndAmmos['artillery'], Ammos[i])
-            table.remove(Ammos, i)
+    for i = #ammos, 1, -1 do
+        if string.find(ammos[i].name, "artillery") then
+            table.insert(guns_and_ammos['artillery'], ammos[i])
+            table.remove(ammos, i)
         end
     end
+
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
-    --- Actual orden de la sección
-    local Combat = {}
-    for key, Subgroups in pairs(This_MOD.new_order["combat"]) do
-        table.insert(Combat, Subgroups)
-        Subgroups.subgroup = key
-    end
 
-    --- Agregar el nuevo filtro
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    ---> Agregar los nuevos filtros
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    local Combat = GPrefix.get_table(This_MOD.after_format, "name", "combat")
     local Count = #Combat - 2
-    for key, value in pairs(GunsAndAmmos) do
+    for key, value in pairs(guns_and_ammos) do
         value.subgroup = key
         table.insert(Combat, #Combat - Count, value)
     end
-    Ammos.subgroup = "other-ammo"
-    table.insert(Combat, #Combat - Count, Ammos)
+    ammos.subgroup = "other-ammo"
+    table.insert(Combat, #Combat - Count, ammos)
 
-    --- Actualizar la sección
-    This_MOD.new_order["combat"] = {}
-    for _, Subgroups in pairs(Combat) do
-        local subgroups = This_MOD.new_order["combat"][Subgroups.subgroup] or {}
-        This_MOD.new_order["combat"][Subgroups.subgroup] = subgroups
-        Subgroups.subgroup = nil
-        for _, Filter in pairs(Subgroups) do
-            table.insert(subgroups, Filter)
-        end
-    end
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
+
+---------------------------------------------------------------------------------------------------
 
 --- Eliminar los subgroup vacios
 function This_MOD.deleteEmptySubgroups()
