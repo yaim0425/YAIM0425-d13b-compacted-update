@@ -10,6 +10,11 @@ local This_MOD = {}
 
 --- Iniciar el modulo
 function This_MOD.start()
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    --- Obtener información del nombre de MOD
+    GPrefix.split_name_folder(This_MOD)
+
     --- Valores de la referencia
     This_MOD.setting_mod()
 
@@ -42,12 +47,13 @@ function This_MOD.start()
 
     -- --- Agrupar las recetas
     -- ThisMOD.GroupRecipes()
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
 
 --- Valores de la referencia
 function This_MOD.setting_mod()
-    --- Prefijo de este MOD
-    This_MOD.prefix = GPrefix.name .. "-0100-"
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
     --- Nueva organización según cada grupo
     This_MOD.new_sort = {}
@@ -449,6 +455,8 @@ function This_MOD.setting_mod()
             { type = "fluid", name = "fusion-plasma" }
         }
     }
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -459,7 +467,8 @@ end
 
 ---------------------------------------------------------------------------------------------------
 
---- Darle un formato que facilite el manejor a lo largo de este mod
+--- Darle un formato que facilite el manejor
+--- a lo largo de este mod
 function This_MOD.set_format()
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
@@ -479,6 +488,8 @@ function This_MOD.set_format()
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
+
+---------------------------------------------------------------------------------------------------
 
 --- Incluir las armas y las municiones
 function This_MOD.addGunsAndAmmos()
