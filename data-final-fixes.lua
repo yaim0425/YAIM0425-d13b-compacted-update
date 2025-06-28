@@ -13,6 +13,9 @@ function This_MOD.start()
     --- Valores de la referencia
     This_MOD.setting_mod()
 
+    --- Darle un formato que facilite el manejor a lo largo de este mod
+    This_MOD.set_format()
+
     -- --- Incluir las armas y las municiones
     -- ThisMOD.addGunsAndAmmos()
 
@@ -44,13 +47,10 @@ end
 --- Valores de la referencia
 function This_MOD.setting_mod()
     --- Prefijo de este MOD
-    This_MOD.prefix    = GPrefix.name .. "-0100-"
-
-    --- Renombrar la tabla
-    This_MOD.subgroups = data.raw["item-subgroup"]
+    This_MOD.prefix = GPrefix.name .. "-0100-"
 
     --- Nueva organización según cada grupo
-    This_MOD.new_sort   = {}
+    This_MOD.new_sort = {}
     This_MOD.new_sort["logistics"] = {
         ["storages"] = {
             { type = "container", pattern = "chest" }
@@ -459,11 +459,26 @@ end
 
 ---------------------------------------------------------------------------------------------------
 
---- Darle un formato faci
-function This_MOD.format_()
+--- Darle un formato que facilite el manejor a lo largo de este mod
+function This_MOD.set_format()
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
+    This_MOD.last_format = {}
+    for group_name, subgroups in pairs(This_MOD.new_sort) do
+        --- --- --- --- --- --- --- --- --- --- --- --- ---
+        local Space = { name = group_name }
+        table.insert(This_MOD.last_format, Space)
+        --- --- --- --- --- --- --- --- --- --- --- --- ---
+        for subgroup_name, subgroup in pairs(subgroups) do
+            subgroup = util.copy(subgroup)
+            table.insert(Space, subgroup)
+            subgroup.subgroup = subgroup_name
+        end
+        --- --- --- --- --- --- --- --- --- --- --- --- ---
+    end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
-
 
 --- Incluir las armas y las municiones
 function This_MOD.addGunsAndAmmos()
@@ -1091,7 +1106,7 @@ end
 
 --- Iniciar el modulo
 This_MOD.start()
-GPrefix.var_dump(This_MOD)
+GPrefix.var_dump(This_MOD.last_format)
 ERROR()
 
 ---------------------------------------------------------------------------------------------------
