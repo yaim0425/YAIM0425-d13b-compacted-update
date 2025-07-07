@@ -697,13 +697,13 @@ function This_MOD.apply_filters()
 
                 --- Eliminar los filtros vacios
                 if #New_filter == 0 then
-                    New_subgroup[k] = nil
+                    table.remove(New_subgroup, k)
                 end
             end
 
             --- Eliminar los subgrupos vacios
             if #New_subgroup == 0 then
-                New_subgroups[j] = nil
+                table.remove(New_subgroups, j)
             end
         end
     end
