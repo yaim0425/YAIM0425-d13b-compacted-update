@@ -28,8 +28,8 @@ function This_MOD.start()
     --- Filtrar los elementos a ordenar
     This_MOD.apply_filters()
 
-    -- --- Corregir lo filtrado
-    -- This_MOD.CorrectTaget()
+    --- Fusionar los resiltados de los filtros indicados
+    This_MOD.join_filters()
 
     -- --- Eliminar los elementos duplicados - dejar el último
     -- This_MOD.OnlyLast()
@@ -742,6 +742,24 @@ function This_MOD.apply_filters()
     end
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+end
+
+--- Fusionar los resiltados de los filtros indicados
+function This_MOD.join_filters()
+    for _, join in pairs(This_MOD.join) do
+        local Group = GPrefix.get_table(This_MOD.new_order, "name", join.group)
+        local Subgroup = GPrefix.get_table(Group, "name", join.subgroup)
+        table.sort(join.filters)
+        local Aux = {}
+        for i = #join.filters, 1, -1 do
+            local j = join.filters[i]
+            for _, element in pairs(Subgroup[j]) do
+                table.insert(Aux, element)
+            end
+            Subgroup[j] = nil
+        end
+        table.insert(Subgroup, join.filters[1], Aux)
+    end
 end
 
 ---------------------------------------------------------------------------------------------------
