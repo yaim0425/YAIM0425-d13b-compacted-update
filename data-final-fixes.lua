@@ -458,7 +458,18 @@ function This_MOD.setting_mod()
     }
 
     --- Fusionar los resultados de los filtros
-    This_MOD.fusion = {}
+    This_MOD.join = {
+        {
+            group = "logistics",
+            subgroup = "electric-system",
+            filters = { 1, 2 }
+        },
+        {
+            group = "combat",
+            subgroup = "capsules",
+            filters = { 1, 2 }
+        }
+    }
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
