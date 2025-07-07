@@ -457,6 +457,9 @@ function This_MOD.setting_mod()
         }
     }
 
+    --- Fusionar los resultados de los filtros
+    This_MOD.fusion = {}
+
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
 
@@ -519,36 +522,36 @@ function This_MOD.order_guns_and_ammos()
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
     --- Filtrar las municiones
-    local ammos_by_type = {}
+    local Ammos_by_type = {}
     for _, ammo in pairs(data.raw["ammo"]) do
-        local Type = ammos_by_type[ammo.ammo_category] or {}
-        ammos_by_type[ammo.ammo_category] = Type
+        local Type = Ammos_by_type[ammo.ammo_category] or {}
+        Ammos_by_type[ammo.ammo_category] = Type
         table.insert(Type, ammo)
     end
 
     --- Filtrar las armas
-    local guns_by_type = {}
+    local Guns_by_type = {}
     for _, gun in pairs(GPrefix.Items) do
         local ammo = gun.attack_parameters and gun.attack_parameters.ammo_category or nil
         if ammo then
-            local type = guns_by_type[ammo] or {}
-            guns_by_type[ammo] = type
+            local type = Guns_by_type[ammo] or {}
+            Guns_by_type[ammo] = type
             table.insert(type, gun)
         end
     end
 
     --- Combinar armas y municiones, si es posible
-    local ammos = {}          --- Municiones sin armas
-    local guns_and_ammos = {} --- Municiones con armas
-    for ammo_category, type in pairs(ammos_by_type) do
+    local Ammos = {}          --- Municiones sin armas
+    local Guns_and_ammos = {} --- Municiones con armas
+    for ammo_category, type in pairs(Ammos_by_type) do
         --- Municiones con armas
-        if guns_by_type[ammo_category] then
+        if Guns_by_type[ammo_category] then
             --- Crear el espacio
-            local subgroup = guns_and_ammos[ammo_category] or {}
-            guns_and_ammos[ammo_category] = subgroup
+            local subgroup = Guns_and_ammos[ammo_category] or {}
+            Guns_and_ammos[ammo_category] = subgroup
 
             --- Agregar las armas
-            for _, weapon in pairs(guns_by_type[ammo_category]) do
+            for _, weapon in pairs(Guns_by_type[ammo_category]) do
                 table.insert(subgroup, { type = weapon.type, name = weapon.name })
             end
 
@@ -559,9 +562,9 @@ function This_MOD.order_guns_and_ammos()
         end
 
         --- Municiones sin armas
-        if not guns_by_type[ammo_category] then
+        if not Guns_by_type[ammo_category] then
             for _, ammo in pairs(type) do
-                table.insert(ammos, { type = ammo.type, name = ammo.name })
+                table.insert(Ammos, { type = ammo.type, name = ammo.name })
             end
         end
     end
@@ -579,7 +582,7 @@ function This_MOD.order_guns_and_ammos()
     --- Agregar la ametralladora
     for _, entity in pairs(data.raw["ammo-turret"]) do
         if entity.minable then
-            table.insert(guns_and_ammos['bullet'], {
+            table.insert(Guns_and_ammos['bullet'], {
                 pattern = entity.name,
                 type = entity.type
             })
@@ -587,10 +590,10 @@ function This_MOD.order_guns_and_ammos()
     end
 
     --- Agregar la artilleria
-    guns_and_ammos['artillery'] = {}
+    Guns_and_ammos['artillery'] = {}
     for _, Entity in pairs(data.raw["artillery-turret"]) do
         if Entity.minable then
-            table.insert(guns_and_ammos['artillery'], {
+            table.insert(Guns_and_ammos['artillery'], {
                 pattern = Entity.name,
                 type = Entity.type
             })
@@ -598,10 +601,10 @@ function This_MOD.order_guns_and_ammos()
     end
 
     --- Agregar la municiones para la artilleria
-    for i = #ammos, 1, -1 do
-        if string.find(ammos[i].name, "artillery") then
-            table.insert(guns_and_ammos['artillery'], ammos[i])
-            table.remove(ammos, i)
+    for i = #Ammos, 1, -1 do
+        if string.find(Ammos[i].name, "artillery") then
+            table.insert(Guns_and_ammos['artillery'], Ammos[i])
+            table.remove(Ammos, i)
         end
     end
 
@@ -616,14 +619,14 @@ function This_MOD.order_guns_and_ammos()
     ---> Agregar los nuevos filtros
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
-    local combat = GPrefix.get_table(This_MOD.after_format, "name", "combat")
-    local count = #combat - 2 -- 2 Posicion del primer subgroup
-    for key, value in pairs(guns_and_ammos) do
+    local Combat = GPrefix.get_table(This_MOD.after_format, "name", "combat")
+    local Count = #Combat - 2 -- 2 Posicion del primer subgroup
+    for key, value in pairs(Guns_and_ammos) do
         value.name = key
-        table.insert(combat, #combat - count, value)
+        table.insert(Combat, #Combat - Count, value)
     end
-    ammos.name = "other-ammo"
-    table.insert(combat, #combat - count, ammos)
+    Ammos.name = "other-ammo"
+    table.insert(Combat, #Combat - Count, Ammos)
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
@@ -637,43 +640,43 @@ function This_MOD.apply_filters()
 
     --- Aplicar los filtros
     for i = #This_MOD.after_format, 1, -1 do
-        local after_subgroups = This_MOD.after_format[i] or {}
-        local new_subgroups = This_MOD.new_order[i] or {}
-        This_MOD.new_order[i] = new_subgroups
-        new_subgroups.name = after_subgroups.name
-        for j = #after_subgroups, 1, -1 do
-            local after_subgroup = after_subgroups[j] or {}
-            local new_subgroup = new_subgroups[j] or {}
-            new_subgroups[j] = new_subgroup
-            new_subgroup.name = after_subgroup.name
-            for k = #after_subgroup, 1, -1 do
-                local after_filter = after_subgroup[k] or {}
-                local new_filter = new_subgroup[k] or {}
-                new_subgroup[k] = new_filter
+        local After_subgroups = This_MOD.after_format[i] or {}
+        local New_subgroups = This_MOD.new_order[i] or {}
+        This_MOD.new_order[i] = New_subgroups
+        New_subgroups.name = After_subgroups.name
+        for j = #After_subgroups, 1, -1 do
+            local After_subgroup = After_subgroups[j] or {}
+            local New_subgroup = New_subgroups[j] or {}
+            New_subgroups[j] = New_subgroup
+            New_subgroup.name = After_subgroup.name
+            for k = #After_subgroup, 1, -1 do
+                local After_filter = After_subgroup[k] or {}
+                local New_filter = New_subgroup[k] or {}
+                New_subgroup[k] = New_filter
                 --- --- --- --- --- --- --- --- --- --- ---
 
                 --- Filtro a usar
-                local pattern = after_filter.pattern and string.gsub(after_filter.pattern, "-", "%%-") or nil
-                local name = after_filter.name
+                local Pattern = After_filter.pattern and string.gsub(After_filter.pattern, "-", "%%-") or nil
+                local Name = After_filter.name
 
                 --- Recorrer los elementos
-                for _, elemet in pairs(data.raw[after_filter.type] or {}) do
+                for _, elemet in pairs(data.raw[After_filter.type] or {}) do
                     if not elemet.hidden then
-                        if pattern then
+                        if Pattern then
                             --- Filtrar por patron
-                            if pattern ~= "." and string.find(elemet.name, pattern) then
-                                table.insert(new_filter, elemet)
+                            if Pattern ~= "." and string.find(elemet.name, Pattern) then
+                                table.insert(New_filter, elemet)
                             end
                             --- Todo es valido
-                            if pattern == "." then
-                                table.insert(new_filter, elemet)
+                            if Pattern == "." then
+                                table.insert(New_filter, elemet)
                             end
                         end
 
                         --- Filtrar por nombre
-                        if not pattern then
-                            if elemet.name == name then
-                                table.insert(new_filter, elemet)
+                        if not Pattern then
+                            if elemet.name == Name then
+                                table.insert(New_filter, elemet)
                             end
                         end
                     end
@@ -682,43 +685,43 @@ function This_MOD.apply_filters()
                 --- --- --- --- --- --- --- --- --- --- ---
 
                 --- Eliminar los filtros vacios
-                if #new_filter == 0 then
-                    new_subgroup[k] = nil
+                if #New_filter == 0 then
+                    New_subgroup[k] = nil
                 end
             end
 
             --- Eliminar los subgrupos vacios
-            if #new_subgroup == 0 then
-                new_subgroups[j] = nil
+            if #New_subgroup == 0 then
+                New_subgroups[j] = nil
             end
         end
     end
 
     --- Remplazar entidades por los objetos
     for i = #This_MOD.new_order, 1, -1 do
-        local subgroups = This_MOD.new_order[i] or {}
-        for j = #subgroups, 1, -1 do
-            local subgroup = subgroups[j] or {}
-            for k = #subgroup, 1, -1 do
-                local filter = subgroup[k] or {}
-                for l = #filter, 1, -1 do
-                    local element = filter[l]
+        local Subgroups = This_MOD.new_order[i] or {}
+        for j = #Subgroups, 1, -1 do
+            local Subgroup = Subgroups[j] or {}
+            for k = #Subgroup, 1, -1 do
+                local Filter = Subgroup[k] or {}
+                for l = #Filter, 1, -1 do
+                    local Element = Filter[l]
                     --- --- --- --- --- --- --- --- --- --- ---
 
                     --- Indicadores de busqueda
-                    local items = nil
+                    local Items = nil
 
                     --- Buscar elementos
-                    if element.minable and element.minable.results then
-                        items = element.minable.results
-                    elseif GPrefix.Equipments[element.name] then
-                        items = { element }
+                    if Element.minable and Element.minable.results then
+                        Items = Element.minable.results
+                    elseif GPrefix.Equipments[Element.name] then
+                        Items = { Element }
                     end
 
                     --- Acción a tomar
-                    for _, Item in pairs(items or {}) do
-                        local item = GPrefix.Items[Item.name]
-                        if item then table.insert(filter, item) end
+                    for _, Item in pairs(Items or {}) do
+                        local Item = GPrefix.Items[Item.name]
+                        if Item then table.insert(Filter, Item) end
                     end
 
                     --- --- --- --- --- --- --- --- --- --- ---
