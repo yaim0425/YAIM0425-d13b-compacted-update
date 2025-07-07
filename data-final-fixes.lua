@@ -744,7 +744,7 @@ function This_MOD.apply_filters()
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
 
---- Fusionar los resiltados de los filtros indicados
+--- Fusionar los resultados de los filtros indicados
 function This_MOD.join_filters()
     for _, join in pairs(This_MOD.join) do
         local Group = GPrefix.get_table(This_MOD.new_order, "name", join.group)
