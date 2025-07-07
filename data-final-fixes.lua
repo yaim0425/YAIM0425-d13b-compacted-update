@@ -25,8 +25,8 @@ function This_MOD.start()
     --- Incluir las armas y las municiones
     This_MOD.order_guns_and_ammos()
 
-    -- --- Filtrar los elementos a ordenar
-    -- This_MOD.getTarget()
+    --- Filtrar los elementos a ordenar
+    This_MOD.apply_filters()
 
     -- --- Corregir lo filtrado
     -- This_MOD.CorrectTaget()
@@ -468,6 +468,28 @@ end
 
 ---------------------------------------------------------------------------------------------------
 
+--- Eliminar los subgroup vacios
+function This_MOD.delete_empty_subgroups()
+    --- Eliminar los subgroup vacios
+    for _, groups in pairs(This_MOD.new_order) do
+        local Remove = {}
+
+        --- Buscar los vacios
+        for key, subgroup in pairs(groups) do
+            if GPrefix.get_length(subgroup) == 0 then
+                Remove[key] = true
+            end
+        end
+
+        --- Borrar los vacios
+        for key, _ in pairs(Remove) do
+            groups[key] = nil
+        end
+    end
+end
+
+---------------------------------------------------------------------------------------------------
+
 --- Darle un formato que facilite el manejor
 --- a lo largo de este mod
 function This_MOD.set_format()
@@ -482,7 +504,7 @@ function This_MOD.set_format()
         for subgroup_name, subgroup in pairs(subgroups) do
             subgroup = util.copy(subgroup)
             table.insert(Space, subgroup)
-            subgroup.subgroup = subgroup_name
+            subgroup.name = subgroup_name
         end
         --- --- --- --- --- --- --- --- --- --- --- --- ---
     end
@@ -516,7 +538,7 @@ function This_MOD.order_guns_and_ammos()
     end
 
     --- Combinar armas y municiones, si es posible
-    local ammos = {} --- Municiones sin armas
+    local ammos = {}          --- Municiones sin armas
     local guns_and_ammos = {} --- Municiones con armas
     for ammo_category, type in pairs(ammos_by_type) do
         --- Municiones con armas
@@ -597,169 +619,118 @@ function This_MOD.order_guns_and_ammos()
     local combat = GPrefix.get_table(This_MOD.after_format, "name", "combat")
     local count = #combat - 2 -- 2 Posicion del primer subgroup
     for key, value in pairs(guns_and_ammos) do
-        value.subgroup = key
+        value.name = key
         table.insert(combat, #combat - count, value)
     end
-    ammos.subgroup = "other-ammo"
+    ammos.name = "other-ammo"
     table.insert(combat, #combat - count, ammos)
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
 
----------------------------------------------------------------------------------------------------
-
---- Eliminar los subgroup vacios
-function This_MOD.deleteEmptySubgroups()
-    --- Eliminar los subgroup vacios
-    for _, Subgroups in pairs(This_MOD.newSort) do
-        local Remove = {}
-
-        --- Buscar los vacios
-        for key, value in pairs(Subgroups) do
-            if GPrefix.get_length(value) == 0 then
-                Remove[key] = true
-            end
-        end
-
-        --- Borrar los vacios
-        for key, _ in pairs(Remove) do
-            Subgroups[key] = nil
-        end
-    end
-end
-
 --- Filtrar los elementos a ordenar
-function This_MOD.getTarget()
+function This_MOD.apply_filters()
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
     --- Contiene el resultado de los filtros
-    This_MOD.newSort = {}
+    This_MOD.new_order = {}
 
     --- Aplicar los filtros
-    for Group, Subgroups in pairs(This_MOD.new_order) do
-        local group = This_MOD.newSort[Group] or {}
-        This_MOD.newSort[Group] = group
-        for key, Subgroup in pairs(Subgroups) do
-            local subgroup = group[key] or {}
-            group[key] = subgroup
-            for _, Filter in pairs(Subgroup) do
-                local i = #subgroup + 1
-                local filter = subgroup[i] or {}
-                subgroup[i] = filter
+    for i = #This_MOD.after_format, 1, -1 do
+        local after_subgroups = This_MOD.after_format[i] or {}
+        local new_subgroups = This_MOD.new_order[i] or {}
+        This_MOD.new_order[i] = new_subgroups
+        new_subgroups.name = after_subgroups.name
+        for j = #after_subgroups, 1, -1 do
+            local after_subgroup = after_subgroups[j] or {}
+            local new_subgroup = new_subgroups[j] or {}
+            new_subgroups[j] = new_subgroup
+            new_subgroup.name = after_subgroup.name
+            for k = #after_subgroup, 1, -1 do
+                local after_filter = after_subgroup[k] or {}
+                local new_filter = new_subgroup[k] or {}
+                new_subgroup[k] = new_filter
+                --- --- --- --- --- --- --- --- --- --- ---
 
                 --- Filtro a usar
-                local pattern = Filter.pattern and string.gsub(Filter.pattern, "-", "%%-")
-                local name = Filter.name
+                local pattern = after_filter.pattern and string.gsub(after_filter.pattern, "-", "%%-") or nil
+                local name = after_filter.name
 
                 --- Recorrer los elementos
-                for _, Elemet in pairs(data.raw[Filter.type] or {}) do
-                    if not Elemet.hidden then
+                for _, elemet in pairs(data.raw[after_filter.type] or {}) do
+                    if not elemet.hidden then
                         if pattern then
                             --- Filtrar por patron
-                            if pattern ~= "." and string.find(Elemet.name, pattern) then
-                                table.insert(filter, Elemet)
+                            if pattern ~= "." and string.find(elemet.name, pattern) then
+                                table.insert(new_filter, elemet)
                             end
                             --- Todo es valido
                             if pattern == "." then
-                                table.insert(filter, Elemet)
+                                table.insert(new_filter, elemet)
                             end
                         end
 
                         --- Filtrar por nombre
                         if not pattern then
-                            if Elemet.name == name then
-                                table.insert(filter, Elemet)
+                            if elemet.name == name then
+                                table.insert(new_filter, elemet)
                             end
                         end
                     end
                 end
 
-                --- Sin resultado
-                if #filter == 0 then
-                    table.remove(subgroup, i)
+                --- --- --- --- --- --- --- --- --- --- ---
+
+                --- Eliminar los filtros vacios
+                if #new_filter == 0 then
+                    new_subgroup[k] = nil
                 end
+            end
+
+            --- Eliminar los subgrupos vacios
+            if #new_subgroup == 0 then
+                new_subgroups[j] = nil
             end
         end
     end
 
-    --- Eliminar los subgroup vacios
-    This_MOD.deleteEmptySubgroups()
-
     --- Remplazar entidades por los objetos
-    for _, Subgroups in pairs(This_MOD.newSort) do
-        for _, Subgroup in pairs(Subgroups) do
-            --- Elementos a eliminar
-            local iFilter = {}
+    for i = #This_MOD.new_order, 1, -1 do
+        local subgroups = This_MOD.new_order[i] or {}
+        for j = #subgroups, 1, -1 do
+            local subgroup = subgroups[j] or {}
+            for k = #subgroup, 1, -1 do
+                local filter = subgroup[k] or {}
+                for l = #filter, 1, -1 do
+                    local element = filter[l]
+                    --- --- --- --- --- --- --- --- --- --- ---
 
-            --- Recorrer los filtros
-            for i, Filter in pairs(Subgroup) do
-                --- Elementos a eliminar
-                local jElement = {}
-
-                --- Convertir elementos
-                for j, Element in pairs(Filter) do
                     --- Indicadores de busqueda
-                    local Find = false
-                    local Item = ""
+                    local items = nil
 
                     --- Buscar elementos
-                    if Element.minable and Element.minable.results then
-                        local result = Element.minable.results[1]
-                        Item = result.name
-                        Find = true
-                    elseif GPrefix.Equipments[Element.name] then
-                        Item = Element.name
-                        Find = true
+                    if element.minable and element.minable.results then
+                        items = element.minable.results
+                    elseif GPrefix.Equipments[element.name] then
+                        items = { element }
                     end
 
                     --- Acción a tomar
-                    if Find then
-                        Item = GPrefix.Items[Item]
-                        if Item then Filter[j] = Item end
-                        if not Item then table.insert(jElement, 1, j) end
+                    for _, Item in pairs(items or {}) do
+                        local item = GPrefix.Items[Item.name]
+                        if item then table.insert(filter, item) end
                     end
-                end
 
-                --- Eliminar los elementos
-                for _, j in pairs(jElement) do
-                    table.remove(Filter, j)
-                end
-
-                --- Filtros a eliminar
-                if #Filter == 0 then
-                    table.insert(iFilter, 1, i)
-                end
-            end
-
-            --- Eliminar los elementos
-            for _, i in pairs(iFilter) do
-                table.remove(Subgroup, i)
-            end
-        end
-    end
-
-    --- Eliminar los subgroup vacios
-    This_MOD.deleteEmptySubgroups()
-
-    --- Eliminar los elementos fuera del group
-    for Group, Subgroups in pairs(This_MOD.newSort) do
-        for _, Subgroup in pairs(Subgroups) do
-            for _, Fiters in pairs(Subgroup) do
-                for i = #Fiters, 1, -1 do
-                    if Fiters[i].subgroup then
-                        local subgroup = This_MOD.subgroups[Fiters[i].subgroup]
-                        if subgroup.group ~= Group then
-                            table.remove(Fiters, i)
-                        end
-                    else
-                        table.remove(Fiters, i)
-                    end
+                    --- --- --- --- --- --- --- --- --- --- ---
                 end
             end
         end
     end
 
-    --- Eliminar los subgroup vacios
-    This_MOD.deleteEmptySubgroups()
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
+
+---------------------------------------------------------------------------------------------------
 
 --- Corregir lo filtrado
 function This_MOD.CorrectTaget()
@@ -772,7 +743,7 @@ function This_MOD.CorrectTaget()
     --- Hacer la corrección
     for _, keys in pairs(listKeys) do
         --- Subgroup a corregir
-        local Aux = This_MOD.newSort
+        local Aux = This_MOD.new_order
         for _, key in pairs(keys) do
             Aux = Aux[key] or {}
         end
@@ -795,7 +766,7 @@ end
 function This_MOD.OnlyLast()
     --- Reordenar para buscar
     local listSort = {}
-    for SubgroupsKey, Subgroups in pairs(This_MOD.newSort) do
+    for SubgroupsKey, Subgroups in pairs(This_MOD.new_order) do
         for SubgroupKey, Subgroup in pairs(Subgroups) do
             for ElementsKey, Elements in pairs(Subgroup) do
                 for ElementKey, Element in pairs(Elements) do
@@ -845,7 +816,7 @@ function This_MOD.OnlyLast()
 
     --- Eliminar los duplicados
     for _, keys in pairs(listDelete) do
-        local Aux = This_MOD.newSort
+        local Aux = This_MOD.new_order
         for i = 1, 3, 1 do
             Aux = Aux[keys[i]]
         end
@@ -862,7 +833,7 @@ function This_MOD.OnlyLast()
 
     --- Eliminar los resultados vacios
     for _, keys in pairs(listValidate) do
-        local Aux = This_MOD.newSort
+        local Aux = This_MOD.new_order
         for i = 1, 2, 1 do
             Aux = Aux[keys[i]]
         end
@@ -873,14 +844,14 @@ function This_MOD.OnlyLast()
     end
 
     --- Eliminar los subgroup vacios
-    This_MOD.deleteEmptySubgroups()
+    This_MOD.delete_empty_subgroups()
 end
 
 --- Separar los filtros grandes
 function This_MOD.SplitBigTaget()
     --- Reordenar para buscar
     local listSort = {}
-    for SubgroupsKey, Subgroups in pairs(This_MOD.newSort) do
+    for SubgroupsKey, Subgroups in pairs(This_MOD.new_order) do
         for SubgroupKey, Subgroup in pairs(Subgroups) do
             for ElementsKey, Elements in pairs(Subgroup) do
                 local Key = {
@@ -902,7 +873,7 @@ function This_MOD.SplitBigTaget()
     repeat
         --- Renombrar
         local Filtro = listSort[Count]
-        local Aux = This_MOD.newSort
+        local Aux = This_MOD.new_order
         Aux = Aux[Filtro.keys[1]]
         Aux = Aux[Filtro.keys[2]]
 
@@ -927,7 +898,7 @@ function This_MOD.SplitBigTaget()
     --- Agregar los nuevos subgroups
     for GroupName, Subgroups in pairs(listValidate) do
         local NewGroup = {}
-        for key, value in pairs(This_MOD.newSort[GroupName]) do
+        for key, value in pairs(This_MOD.new_order[GroupName]) do
             --- Posicionar los nuevos subgroups
             if Subgroups[key] then
                 table.insert(NewGroup, { name = key .. "-1", value = value })
@@ -947,21 +918,21 @@ function This_MOD.SplitBigTaget()
 
         --- Agregar los nuevos subgroups
         local newGroup = {}
-        This_MOD.newSort[GroupName] = newGroup
+        This_MOD.new_order[GroupName] = newGroup
         for _, Subgroup in pairs(NewGroup) do
             newGroup[Subgroup.name] = Subgroup.value
         end
     end
 
     --- Eliminar los subgroup vacios
-    This_MOD.deleteEmptySubgroups()
+    This_MOD.delete_empty_subgroups()
 end
 
 --- Re-ordenar los subgroups
 function This_MOD.SortSubgroups()
     --- Agrupar los veijos subgroups
     local oldGroup = {}
-    for group, _ in pairs(This_MOD.newSort) do
+    for group, _ in pairs(This_MOD.new_order) do
         local Group = oldGroup[group] or {}
         oldGroup[group] = Group
         for _, subgroup in pairs(data.raw["item-subgroup"]) do
@@ -973,7 +944,7 @@ function This_MOD.SortSubgroups()
 
     --- Crear y agrupar los nuevos subgroups
     local newGroup = {}
-    for group, subgroups in pairs(This_MOD.newSort) do
+    for group, subgroups in pairs(This_MOD.new_order) do
         local Group = newGroup[group] or {}
         newGroup[group] = Group
         for subgroup, _ in pairs(subgroups) do
@@ -1016,7 +987,7 @@ end
 --- Re-ordenar los objetivos
 function This_MOD.SortTarget()
     --- Cambiar los orders para ordenarlo luego
-    for _, Subgroups in pairs(This_MOD.newSort) do
+    for _, Subgroups in pairs(This_MOD.new_order) do
         for _, Subgroup in pairs(Subgroups) do
             for i, Elements in pairs(Subgroup) do
                 for _, Element in pairs(Elements) do
@@ -1035,7 +1006,7 @@ function This_MOD.SortTarget()
     end
 
     --- Ordenar los elementos
-    for _, Subgroups in pairs(This_MOD.newSort) do
+    for _, Subgroups in pairs(This_MOD.new_order) do
         for Name, Elements in pairs(Subgroups) do
             --- Contenedor temporal
             local NewOrder = {}
@@ -1064,7 +1035,7 @@ function This_MOD.SortTarget()
     end
 
     --- Actualizar el order
-    for _, subgroups in pairs(This_MOD.newSort) do
+    for _, subgroups in pairs(This_MOD.new_order) do
         for subgroup, elements in pairs(subgroups) do
             local Digits = GPrefix.digit_count(#elements) + 1
             for key, element in pairs(elements) do
@@ -1078,7 +1049,7 @@ end
 --- Hacer algunas correciones
 function This_MOD.Correct()
     --- Ocultar las recetas para vaciar los barriles
-    local RecipesEmptyBarrels = This_MOD.newSort["intermediate-products"]
+    local RecipesEmptyBarrels = This_MOD.new_order["intermediate-products"]
     RecipesEmptyBarrels = RecipesEmptyBarrels["recipes-empty-barrels"]
     for _, Recipe in pairs(RecipesEmptyBarrels) do
         Recipe.subgroup = This_MOD.subgroup
@@ -1123,7 +1094,7 @@ end
 
 --- Iniciar el modulo
 This_MOD.start()
-GPrefix.var_dump(This_MOD.after_format)
+-- GPrefix.var_dump(This_MOD.new_order)
 ERROR()
 
 ---------------------------------------------------------------------------------------------------
