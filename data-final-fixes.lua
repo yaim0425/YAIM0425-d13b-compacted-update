@@ -756,7 +756,7 @@ function This_MOD.join_filters()
             for _, element in pairs(Subgroup[j]) do
                 table.insert(Aux, element)
             end
-            Subgroup[j] = nil
+            table.remove(Subgroup, j)
         end
         table.insert(Subgroup, join.filters[1], Aux)
     end
