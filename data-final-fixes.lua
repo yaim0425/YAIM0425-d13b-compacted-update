@@ -730,8 +730,8 @@ function This_MOD.apply_filters()
                     end
 
                     --- Acción a tomar
-                    for _, Item in pairs(Items or {}) do
-                        local Item = GPrefix.Items[Item.name]
+                    for _, item in pairs(Items or {}) do
+                        local Item = GPrefix.Items[item.name]
                         if Item then table.insert(Filter, Item) end
                     end
 
