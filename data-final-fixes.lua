@@ -31,8 +31,8 @@ function This_MOD.start()
     --- Fusionar los resiltados de los filtros indicados
     This_MOD.join_filters()
 
-    -- --- Eliminar los elementos duplicados - dejar el último
-    -- This_MOD.OnlyLast()
+    --- Eliminar los elementos duplicados - dejar el último
+    This_MOD.only_last()
 
     -- --- Separar los filtros grandes
     -- This_MOD.SplitBigTaget()
@@ -418,7 +418,6 @@ function This_MOD.setting_mod()
         },
         ["combat-equipments"] = {
             { type = "energy-shield-equipment",  pattern = "." },
-            { type = "active-defense-equipment", pattern = "." },
             { type = "active-defense-equipment", pattern = "." }
         }
     }
@@ -730,9 +729,12 @@ function This_MOD.apply_filters()
                     end
 
                     --- Acción a tomar
-                    for _, item in pairs(Items or {}) do
-                        local Item = GPrefix.Items[item.name]
-                        if Item then table.insert(Filter, Item) end
+                    if Items then
+                        table.remove(Filter, l)
+                        for _, item in pairs(Items or {}) do
+                            local Item = GPrefix.Items[item.name]
+                            if Item then table.insert(Filter, Item) end
+                        end
                     end
 
                     --- --- --- --- --- --- --- --- --- --- ---
@@ -764,119 +766,77 @@ end
 
 ---------------------------------------------------------------------------------------------------
 
---- Corregir lo filtrado
-function This_MOD.CorrectTaget()
-    --- Enlistar los subgroups a corregir
-    local listKeys = {
-        { "logistics", "electric-system" },
-        { "combat",    "capsules" }
-    }
-
-    --- Hacer la corrección
-    for _, keys in pairs(listKeys) do
-        --- Subgroup a corregir
-        local Aux = This_MOD.new_order
-        for _, key in pairs(keys) do
-            Aux = Aux[key] or {}
-        end
-
-        --- Validación
-        if #Aux < 2 then Aux = {} end
-
-        --- Mover de filtro
-        Count = #Aux
-        for _ = 2, Count, 1 do
-            for _, element in pairs(Aux[2]) do
-                table.insert(Aux[1], element)
-            end
-            table.remove(Aux, 2)
-        end
-    end
-end
-
 --- Eliminar los elementos duplicados - dejar el último
-function This_MOD.OnlyLast()
-    --- Reordenar para buscar
-    local listSort = {}
-    for SubgroupsKey, Subgroups in pairs(This_MOD.new_order) do
-        for SubgroupKey, Subgroup in pairs(Subgroups) do
-            for ElementsKey, Elements in pairs(Subgroup) do
-                for ElementKey, Element in pairs(Elements) do
-                    local Key = {
-                        SubgroupsKey,
-                        SubgroupKey,
-                        ElementsKey,
-                        ElementKey
-                    }
+function This_MOD.only_last()
+    --- --- --- --- --- --- --- --- --- --- ---
 
-                    table.insert(listSort, { keys = Key, value = Element })
+    --- Reordenar para buscar
+    local list_elements = {}
+
+    --- Darle el un formato para facilitar la busqueda
+    for i = 1, #This_MOD.new_order, 1 do
+        local subgroups = This_MOD.new_order[i]
+        for j = 1, #subgroups, 1 do
+            local subgroup = subgroups[j]
+            for k = 1, #subgroup, 1 do
+                local filter = subgroup[k]
+                for l = 1, #filter, 1 do
+                    local Element = filter[l]
+                    --- --- --- --- --- --- --- --- --- --- ---
+
+                    --- Formato deseado
+                    table.insert(list_elements, {
+                        value = Element,
+                        keys = {
+                            group = i,
+                            subgroup = j,
+                            filter = k,
+                            result = l
+                        }
+                    })
+
+                    --- --- --- --- --- --- --- --- --- --- ---
                 end
             end
         end
     end
 
     --- Elementos a eliminar
-    local listDelete = { keys = {}, values = {} }
+    local list_delete = {}
 
     --- Buscar duplicados
-    Count = #listSort
+    local Count = #list_elements
     for i = 1, Count - 1, 1 do
         for j = i + 1, Count, 1 do
-            local iElement = listSort[i]
-            local jElement = listSort[j]
+            local iElement = list_elements[i]
+            local jElement = list_elements[j]
             if iElement.value == jElement.value then
-                local keys = table.concat(iElement.keys, " > ")
-                if not GPrefix.get_key(listDelete.keys, keys) then
-                    listDelete.values[keys] = iElement.keys
-                    table.insert(listDelete.keys, keys)
-                end
+                table.insert(list_delete, 1, iElement.keys)
+                break
             end
         end
     end
 
-    --- Invertir el orden a eliminar
-    for i = #listDelete.keys, 1, -1 do
-        local key = listDelete.keys[i]
-        local value = listDelete.values[key]
-        table.insert(listDelete, value)
-    end
-    listDelete.values = nil
-    listDelete.keys = nil
-
-    --- Resultados afectados
-    local listValidate = { keys = {} }
-
     --- Eliminar los duplicados
-    for _, keys in pairs(listDelete) do
-        local Aux = This_MOD.new_order
-        for i = 1, 3, 1 do
-            Aux = Aux[keys[i]]
-        end
-        table.remove(Aux, keys[4])
+    for _, keys in pairs(list_delete) do
+        --- Renombrar
+        local Group = This_MOD.new_order[keys.group]
+        local Subgroup = Group[keys.subgroup]
+        local Filter = Subgroup[keys.filter]
 
-        table.remove(keys)
-        local key = table.concat(keys, " > ")
-        if not GPrefix.get_key(listValidate.keys, key) then
-            table.insert(listValidate.keys, key)
-            table.insert(listValidate, keys)
-        end
-    end
-    listValidate.keys = nil
+        --- Eliminar el duplicado
+        table.remove(Filter, keys.result)
 
-    --- Eliminar los resultados vacios
-    for _, keys in pairs(listValidate) do
-        local Aux = This_MOD.new_order
-        for i = 1, 2, 1 do
-            Aux = Aux[keys[i]]
+        --- Eliminar los filtros vacios
+        if #Filter == 0 then
+            table.remove(Subgroup, keys.filter)
         end
 
-        if #Aux[keys[3]] == 0 then
-            table.remove(Aux, keys[3])
+        --- Eliminar los subgrupos vacios
+        if #Subgroup == 0 then
+            table.remove(Group, keys.subgroup)
         end
     end
-
-    --- Eliminar los subgroup vacios
-    This_MOD.delete_empty_subgroups()
 end
 
 --- Separar los filtros grandes
