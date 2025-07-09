@@ -37,8 +37,8 @@ function This_MOD.start()
     --- Separar los filtros grandes
     This_MOD.split_big_taget()
 
-    -- --- Re-ordenar los subgroups
-    -- This_MOD.SortSubgroups()
+    --- Re-ordenar los subgroups
+    This_MOD.sort_subgroups()
 
     -- --- Re-ordenar los objetivos
     -- This_MOD.SortTarget()
@@ -764,7 +764,7 @@ end
 
 --- Eliminar los elementos duplicados - dejar el último
 function This_MOD.only_last()
-    --- --- --- --- --- --- --- --- --- --- ---
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
     --- Reordenar para buscar
     local List_elements = {}
@@ -778,7 +778,7 @@ function This_MOD.only_last()
                 local Results = subgroup[k]
                 for l = 1, #Results, 1 do
                     local Element = Results[l]
-                    --- --- --- --- --- --- --- --- --- --- ---
+                    --- --- --- --- --- --- --- --- --- ---
 
                     --- Formato deseado
                     table.insert(List_elements, {
@@ -791,11 +791,13 @@ function This_MOD.only_last()
                         }
                     })
 
-                    --- --- --- --- --- --- --- --- --- --- ---
+                    --- --- --- --- --- --- --- --- --- ---
                 end
             end
         end
     end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
     --- Elementos a eliminar
     local List_delete = {}
@@ -833,6 +835,8 @@ function This_MOD.only_last()
             table.remove(Group, keys.subgroup)
         end
     end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
 
 --- Separar los filtros "grandes"
@@ -858,66 +862,68 @@ function This_MOD.split_big_taget()
             end
         end
     end
-    GPrefix.var_dump(This_MOD.new_order)
+end
+
+--- Re-ordenar los subgroups
+function This_MOD.sort_subgroups()
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    --- Variables a usar
+    local Group = {}
+    local Orders = {}
+
+    --- Agrupar los subgroups
+    for _, subgroup in pairs(GPrefix.subgroups) do
+        --- --- --- --- --- --- --- --- --- --- --- --- ---
+        Group[subgroup.group] = Group[subgroup.group] or {}
+        table.insert(Group[subgroup.group], subgroup)
+        --- --- --- --- --- --- --- --- --- --- --- --- ---
+        Orders[subgroup.group] = Orders[subgroup.group] or {}
+        table.insert(Orders[subgroup.group], subgroup.order)
+        --- --- --- --- --- --- --- --- --- --- --- --- ---
+    end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    --- Ordenar los subgroups
+    for key, orders in pairs(Orders) do
+        --- Orden de los viejos subgrupos
+        table.sort(orders)
+
+        --- Cargar los subgrupos
+        local New_group = GPrefix.get_table(This_MOD.new_order, "name", key)
+        local Old_subgroups = Group[key]
+
+        --- Cantiad de nuevos subgrupos
+        local Count = #(New_group or {})
+
+        --- Digitos a usar
+        local Digits = 0
+        Digits = Digits + #orders
+        Digits = Digits + Count
+        Digits = GPrefix.digit_count(Digits) + 1
+
+        --- Crear los nuevos subgrupos
+        for i = 1, Count, 1 do
+            data:extend({{
+                type = "item-subgroup",
+                name = GPrefix.name .. "-" .. New_group[i].name,
+                group = key,
+                order = GPrefix.pad_left_zeros(Digits, i) .. "0"
+            }})
+        end
+
+        --- Actualizar el order de los viejos subgrupos
+        for i, order in pairs(orders) do
+            local subgroup = GPrefix.get_table(Old_subgroups, "order", order)
+            subgroup.order = GPrefix.pad_left_zeros(Digits, i + Count) .. "0"
+        end
+    end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
 
 ---------------------------------------------------------------------------------------------------
-
---- Re-ordenar los subgroups
-function This_MOD.SortSubgroups()
-    --- Agrupar los veijos subgroups
-    local oldGroup = {}
-    for group, _ in pairs(This_MOD.new_order) do
-        local Group = oldGroup[group] or {}
-        oldGroup[group] = Group
-        for _, subgroup in pairs(data.raw["item-subgroup"]) do
-            if subgroup.group == group then
-                Group[tonumber(subgroup.order) / 10] = subgroup
-            end
-        end
-    end
-
-    --- Crear y agrupar los nuevos subgroups
-    local newGroup = {}
-    for group, subgroups in pairs(This_MOD.new_order) do
-        local Group = newGroup[group] or {}
-        newGroup[group] = Group
-        for subgroup, _ in pairs(subgroups) do
-            local newSubgroup = {
-                type = "item-subgroup",
-                group = group,
-                order = #Group + 1 .. "",
-                name = This_MOD.prefix .. subgroup
-            }
-            table.insert(Group, newSubgroup)
-            GPrefix.addDataRaw({ newSubgroup })
-        end
-    end
-
-    --- Reordenar los nuevos subgroups
-    for group, subgroups in pairs(newGroup) do
-        local Digits = #oldGroup[group]
-        Digits = Digits + #newGroup[group]
-        Digits = GPrefix.digit_count(Digits) + 1
-
-        for key, subgroup in pairs(subgroups) do
-            subgroup.order = GPrefix.pad_left(Digits, key) .. "0"
-        end
-    end
-
-    --- Reordenar los viejos subgroups
-    for group, subgroups in pairs(oldGroup) do
-        local Digits = #oldGroup[group]
-        Digits = Digits + #newGroup[group]
-        Digits = GPrefix.digit_count(Digits) + 1
-
-        Count = #newGroup[group]
-
-        for key, subgroup in pairs(subgroups) do
-            subgroup.order = GPrefix.pad_left(Digits, Count + key) .. "0"
-        end
-    end
-end
 
 --- Re-ordenar los objetivos
 function This_MOD.SortTarget()
