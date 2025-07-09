@@ -28,14 +28,14 @@ function This_MOD.start()
     --- Filtrar los elementos a ordenar
     This_MOD.apply_filters()
 
-    --- Fusionar los resiltados de los filtros indicados
-    This_MOD.join_filters()
+    -- --- Fusionar los resiltados de los filtros indicados
+    -- This_MOD.join_filters()
 
-    --- Eliminar los elementos duplicados - dejar el último
-    This_MOD.only_last()
+    -- --- Eliminar los elementos duplicados - dejar el último
+    -- This_MOD.only_last()
 
     -- --- Separar los filtros grandes
-    -- This_MOD.SplitBigTaget()
+    -- This_MOD.split_big_taget()
 
     -- --- Re-ordenar los subgroups
     -- This_MOD.SortSubgroups()
@@ -649,44 +649,42 @@ function This_MOD.apply_filters()
     This_MOD.new_order = {}
 
     --- Aplicar los filtros
-    for i = #This_MOD.after_format, 1, -1 do
-        local After_subgroups = This_MOD.after_format[i] or {}
-        local New_subgroups = This_MOD.new_order[i] or {}
-        This_MOD.new_order[i] = New_subgroups
-        New_subgroups.name = After_subgroups.name
-        for j = #After_subgroups, 1, -1 do
-            local After_subgroup = After_subgroups[j] or {}
-            local New_subgroup = New_subgroups[j] or {}
-            New_subgroups[j] = New_subgroup
-            New_subgroup.name = After_subgroup.name
-            for k = #After_subgroup, 1, -1 do
-                local After_filter = After_subgroup[k] or {}
-                local New_filter = New_subgroup[k] or {}
-                New_subgroup[k] = New_filter
+    for i = 1, #This_MOD.after_format, 1 do
+        local After_group = This_MOD.after_format[i]
+        local New_group = { name = After_group.name }
+        table.insert(This_MOD.new_order, New_group)
+        for j = 1, #After_group, 1 do
+            local After_subgroup = After_group[j]
+            local New_subgroup = { name = After_subgroup.name }
+            for k = 1, #After_subgroup, 1 do
+                local Filter = After_subgroup[k]
+                local Results = {}
                 --- --- --- --- --- --- --- --- --- --- ---
 
                 --- Filtro a usar
-                local Pattern = After_filter.pattern and string.gsub(After_filter.pattern, "-", "%%-") or nil
-                local Name = After_filter.name
+                local Pattern = Filter.pattern and string.gsub(Filter.pattern, "-", "%%-") or nil
+                local Name = Filter.name
 
                 --- Recorrer los elementos
-                for _, elemet in pairs(data.raw[After_filter.type] or {}) do
+                for _, elemet in pairs(data.raw[Filter.type] or {}) do
                     if not elemet.hidden then
+                        elemet.factoriopedia_simulation = nil
+
                         if Pattern then
                             --- Filtrar por patron
                             if Pattern ~= "." and string.find(elemet.name, Pattern) then
-                                table.insert(New_filter, elemet)
+                                table.insert(Results, elemet)
                             end
                             --- Todo es valido
                             if Pattern == "." then
-                                table.insert(New_filter, elemet)
+                                table.insert(Results, elemet)
                             end
                         end
 
                         --- Filtrar por nombre
                         if not Pattern then
                             if elemet.name == Name then
-                                table.insert(New_filter, elemet)
+                                table.insert(Results, elemet)
                             end
                         end
                     end
@@ -694,28 +692,28 @@ function This_MOD.apply_filters()
 
                 --- --- --- --- --- --- --- --- --- --- ---
 
-                --- Eliminar los filtros vacios
-                if #New_filter == 0 then
-                    table.remove(New_subgroup, k)
+                --- Agregar resultados
+                if #Results > 0 then
+                    table.insert(New_subgroup, Results)
                 end
             end
 
-            --- Eliminar los subgrupos vacios
-            if #New_subgroup == 0 then
-                table.remove(New_subgroups, j)
+            --- Agregar los subgroup
+            if #New_subgroup > 0 then
+                table.insert(New_group, New_subgroup)
             end
         end
     end
 
     --- Remplazar entidades por los objetos
     for i = #This_MOD.new_order, 1, -1 do
-        local Subgroups = This_MOD.new_order[i] or {}
+        local Subgroups = This_MOD.new_order[i]
         for j = #Subgroups, 1, -1 do
-            local Subgroup = Subgroups[j] or {}
+            local Subgroup = Subgroups[j]
             for k = #Subgroup, 1, -1 do
-                local Filter = Subgroup[k] or {}
-                for l = #Filter, 1, -1 do
-                    local Element = Filter[l]
+                local Results = Subgroup[k]
+                for l = #Results, 1, -1 do
+                    local Element = Results[l]
                     --- --- --- --- --- --- --- --- --- --- ---
 
                     --- Indicadores de busqueda
@@ -730,10 +728,10 @@ function This_MOD.apply_filters()
 
                     --- Acción a tomar
                     if Items then
-                        table.remove(Filter, l)
-                        for _, item in pairs(Items or {}) do
+                        table.remove(Results, l)
+                        for _, item in pairs(Items) do
                             local Item = GPrefix.Items[item.name]
-                            if Item then table.insert(Filter, Item) end
+                            if Item then table.insert(Results, Item) end
                         end
                     end
 
@@ -763,8 +761,6 @@ function This_MOD.join_filters()
         table.insert(Subgroup, join.filters[1], Aux)
     end
 end
-
----------------------------------------------------------------------------------------------------
 
 --- Eliminar los elementos duplicados - dejar el último
 function This_MOD.only_last()
@@ -840,31 +836,69 @@ function This_MOD.only_last()
 end
 
 --- Separar los filtros grandes
-function This_MOD.SplitBigTaget()
-    --- Reordenar para buscar
-    local listSort = {}
-    for SubgroupsKey, Subgroups in pairs(This_MOD.new_order) do
-        for SubgroupKey, Subgroup in pairs(Subgroups) do
-            for ElementsKey, Elements in pairs(Subgroup) do
-                local Key = {
-                    SubgroupsKey,
-                    SubgroupKey,
-                    ElementsKey
-                }
+function This_MOD.split_big_taget()
+    --- --- --- --- --- --- --- --- --- --- ---
 
-                table.insert(listSort, { keys = Key, value = Elements })
+    --- Reordenar para buscar
+    local list_elements = {}
+
+    --- Darle el un formato para facilitar la busqueda
+    for i = 1, #This_MOD.new_order, 1 do
+        local subgroups = This_MOD.new_order[i]
+        for j = 1, #subgroups, 1 do
+            local subgroup = subgroups[j]
+            for k = 1, #subgroup, 1 do
+                local filter = subgroup[k]
+                --- --- --- --- --- --- --- --- --- --- ---
+
+                --- Formato deseado
+                table.insert(list_elements, {
+                    value = filter,
+                    keys = {
+                        group = i,
+                        subgroup = j,
+                        filter = k
+                    }
+                })
+
+                --- --- --- --- --- --- --- --- --- --- ---
             end
         end
     end
 
-    --- Elimentos retirados
-    local listValidate = {}
+    --- Elimentos separar
+    local list_split = {}
+
+    GPrefix.var_dump(This_MOD.new_order)
+
+    --- Buscar los filtros a separar
+    for _, element in pairs(list_elements) do
+        --- Renombrar
+        local keys = element.keys
+        local Group = This_MOD.new_order[keys.group]
+        local Subgroup = Group[keys.subgroup]
+        local Filter = Subgroup[keys.filter]
+
+        --- Validar filtro
+        if #Filter > 2 and #Subgroup > 1 then
+            GPrefix.var_dump(element)
+            table.insert(list_split, 1, keys)
+        end
+    end
+
+    --- --- --- --- --- --- --- --- --- --- ---
+    --- --- --- --- --- --- --- --- --- --- ---
+    --- --- --- --- --- --- --- --- --- --- ---
+    if true then return end
+    --- --- --- --- --- --- --- --- --- --- ---
+    --- --- --- --- --- --- --- --- --- --- ---
+    --- --- --- --- --- --- --- --- --- --- ---
 
     --- Buscar en los resultados de los filtros
-    Count = #listSort
+    Count = #list_elements
     repeat
         --- Renombrar
-        local Filtro = listSort[Count]
+        local Filtro = list_elements[Count]
         local Aux = This_MOD.new_order
         Aux = Aux[Filtro.keys[1]]
         Aux = Aux[Filtro.keys[2]]
@@ -872,8 +906,8 @@ function This_MOD.SplitBigTaget()
         --- Evaluar el tamaño
         if #Filtro.value > 2 and #Aux > 1 then
             --- Crear los contenedores
-            local Group = listValidate[Filtro.keys[1]] or {}
-            listValidate[Filtro.keys[1]] = Group
+            local Group = list_split[Filtro.keys[1]] or {}
+            list_split[Filtro.keys[1]] = Group
 
             local Subgroup = Group[Filtro.keys[2]] or {}
             Group[Filtro.keys[2]] = Subgroup
@@ -888,7 +922,7 @@ function This_MOD.SplitBigTaget()
     until Count <= 0
 
     --- Agregar los nuevos subgroups
-    for GroupName, Subgroups in pairs(listValidate) do
+    for GroupName, Subgroups in pairs(list_split) do
         local NewGroup = {}
         for key, value in pairs(This_MOD.new_order[GroupName]) do
             --- Posicionar los nuevos subgroups
@@ -919,6 +953,8 @@ function This_MOD.SplitBigTaget()
     --- Eliminar los subgroup vacios
     This_MOD.delete_empty_subgroups()
 end
+
+---------------------------------------------------------------------------------------------------
 
 --- Re-ordenar los subgroups
 function This_MOD.SortSubgroups()
