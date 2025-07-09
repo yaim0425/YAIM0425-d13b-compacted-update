@@ -886,13 +886,13 @@ function This_MOD.sort_subgroups()
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
     --- Ordenar los subgroups
-    for key, orders in pairs(Orders) do
+    for group_name, orders in pairs(Orders) do
         --- Orden de los viejos subgrupos
         table.sort(orders)
 
         --- Cargar los subgrupos
-        local New_group = GPrefix.get_table(This_MOD.new_order, "name", key)
-        local Old_subgroups = Group[key]
+        local New_group = GPrefix.get_table(This_MOD.new_order, "name", group_name)
+        local Old_subgroups = Group[group_name]
 
         --- Cantiad de nuevos subgrupos
         local Count = #(New_group or {})
@@ -908,7 +908,7 @@ function This_MOD.sort_subgroups()
             data:extend({{
                 type = "item-subgroup",
                 name = GPrefix.name .. "-" .. New_group[i].name,
-                group = key,
+                group = group_name,
                 order = GPrefix.pad_left_zeros(Digits, i) .. "0"
             }})
         end
