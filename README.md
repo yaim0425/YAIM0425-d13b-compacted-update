@@ -29,7 +29,7 @@ The main goal is to **improve the organization** of items and recipes in-game to
 - [`zzzYAIM0425 0000 lib`](https://github.com/yaim0425/zzzYAIM0425-0000-lib)  
   This is a **required dependency** for the sorting logic to work correctly.
 
-![](./img/Screenshot (1).png)
-![](./img/Screenshot (2).png)
-![](./img/Screenshot (3).png)
-![](./img/Screenshot (4).png)
+![](./img/Screenshot%20(1).png)
+![](./img/Screenshot%20(2).png)
+![](./img/Screenshot%20(3).png)
+![](./img/Screenshot%20(4).png)
