@@ -76,55 +76,56 @@ function This_MOD.setting_mod()
         },
         ["container-1x1"] = {
             { type = "container",          pattern = "steel-chest" },
-
             { type = "logistic-container", pattern = "storage-chest" },
             { type = "logistic-container", pattern = "passive-provider-chest" },
             { type = "logistic-container", pattern = "requester-chest" },
             { type = "logistic-container", pattern = "buffer-chest" },
             { type = "logistic-container", pattern = "active-provider-chest" }
         },
-        ["container-2x2"] = {
-            { type = "container",          pattern = "strongbox" },
-
-            { type = "logistic-container", pattern = "strongbox-storage" },
-            { type = "logistic-container", pattern = "strongbox-passive-provider" },
-            { type = "logistic-container", pattern = "strongbox-requester" },
-            { type = "logistic-container", pattern = "strongbox-buffer" },
-            { type = "logistic-container", pattern = "strongbox-active-provider" },
-
-            { type = "logistic-container", pattern = "storage-strongbox" },
-            { type = "logistic-container", pattern = "passive-provider-strongbox" },
-            { type = "logistic-container", pattern = "requester-strongbox" },
-            { type = "logistic-container", pattern = "buffer-strongbox" },
-            { type = "logistic-container", pattern = "active-provider-strongbox" }
+        ["pus-container-2x2"] = {
+            { type = "container",          pattern = "storage-hut" },
+            { type = "logistic-container", pattern = "logistic-storage-hut" },
+            { type = "logistic-container", pattern = "logistic-passive-provider-hut" },
+            { type = "logistic-container", pattern = "logistic-requester-hut" },
+            { type = "logistic-container", pattern = "logistic-buffer-hut" },
+            { type = "logistic-container", pattern = "logistic-active-provider-hut" }
         },
-        ["container-4x4"] = {
-            { type = "container",          pattern = "storehouse" },
-
-            { type = "logistic-container", pattern = "storehouse-storage" },
-            { type = "logistic-container", pattern = "storehouse-passive-provider" },
-            { type = "logistic-container", pattern = "storehouse-requester" },
-            { type = "logistic-container", pattern = "storehouse-buffer" },
-            { type = "logistic-container", pattern = "storehouse-active-provider" }
+        ["aai-container-2x2"] = {
+            { type = "container",          name = "aai-strongbox" },
+            { type = "logistic-container", name = "aai-strongbox-storage" },
+            { type = "logistic-container", name = "aai-strongbox-passive-provider" },
+            { type = "logistic-container", name = "aai-strongbox-requester" },
+            { type = "logistic-container", name = "aai-strongbox-buffer" },
+            { type = "logistic-container", name = "aai-strongbox-active-provider" }
         },
-        ["container-6x6"] = {
-            { type = "container",          pattern = "warehouse" },
-
-            { type = "logistic-container", pattern = "warehouse-storage" },
-            { type = "logistic-container", pattern = "warehouse-passive-provider" },
-            { type = "logistic-container", pattern = "warehouse-requester" },
-            { type = "logistic-container", pattern = "warehouse-buffer" },
-            { type = "logistic-container", pattern = "warehouse-active-provider" },
-
-            { type = "logistic-container", pattern = "storage-warehouse" },
-            { type = "logistic-container", pattern = "passive-provider-warehouse" },
-            { type = "logistic-container", pattern = "requester-warehouse" },
-            { type = "logistic-container", pattern = "buffer-warehouse" },
-            { type = "logistic-container", pattern = "active-provider-warehouse" }
+        ["aai-container-4x4"] = {
+            { type = "container",          name = "aai-storehouse" },
+            { type = "logistic-container", name = "aai-storehouse-storage" },
+            { type = "logistic-container", name = "aai-storehouse-passive-provider" },
+            { type = "logistic-container", name = "aai-storehouse-requester" },
+            { type = "logistic-container", name = "aai-storehouse-buffer" },
+            { type = "logistic-container", name = "aai-storehouse-active-provider" }
+        },
+        ["pus-container-5x5"] = {
+            { type = "container",          name = "warehouse" },
+            { type = "logistic-container", name = "logistic-warehouse" },
+            { type = "logistic-container", name = "logistic-warehouse-passive-provider" },
+            { type = "logistic-container", name = "logistic-warehouse-requester" },
+            { type = "logistic-container", name = "logistic-warehouse-buffer" },
+            { type = "logistic-container", name = "logistic-warehouse-active-provider" }
+        },
+        ["aai-container-6x6"] = {
+            { type = "container",          name = "aai-warehouse" },
+            { type = "logistic-container", name = "aai-warehouse-storage" },
+            { type = "logistic-container", name = "aai-warehouse-passive-provider" },
+            { type = "logistic-container", name = "aai-warehouse-requester" },
+            { type = "logistic-container", name = "aai-warehouse-buffer" },
+            { type = "logistic-container", name = "aai-warehouse-active-provider" }
         },
         ["electric-system"] = {
             { type = "electric-pole", pattern = "electric-pole" },
-            { type = "electric-pole", pattern = "substation" }
+            { type = "electric-pole", pattern = "substation" },
+            { type = "electric-pole", name = "electrical-distributor" }
         },
         ["fluid-system"] = {
             { type = "pipe",           pattern = "pipe" },
@@ -158,7 +159,7 @@ function This_MOD.setting_mod()
             { type = "construction-robot", pattern = "construction-robot" }
         },
         ["circuit-network"] = {
-            { type = "lamp",                  pattern = "small-lamp" },
+            { type = "lamp",                  pattern = "-lamp" },
             { type = "arithmetic-combinator", pattern = "arithmetic-combinator" },
             { type = "decider-combinator",    pattern = "decider-combinator" },
             { type = "selector-combinator",   pattern = "selector-combinator" },
