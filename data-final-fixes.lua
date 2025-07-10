@@ -976,9 +976,6 @@ end
 
 --- Re-ordenar los objetivos
 function This_MOD.sort_items()
-    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-
-    --- Darle el un formato para facilitar la busqueda
     for i = #This_MOD.new_order, 1, -1 do
         local Groups = This_MOD.new_order[i]
         for j = #Groups, 1, -1 do
@@ -1031,8 +1028,6 @@ function This_MOD.sort_items()
             --- --- --- --- --- --- --- --- --- --- --- ---
         end
     end
-
-    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
 
 --- Hacer algunas correciones
