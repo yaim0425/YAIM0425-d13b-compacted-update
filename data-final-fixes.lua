@@ -43,11 +43,11 @@ function This_MOD.start()
     --- Re-ordenar los objetivos
     This_MOD.sort_items()
 
-    -- --- Hacer algunas correciones
-    -- This_MOD.Correct()
+    --- Hacer algunas correciones
+    This_MOD.correct()
 
-    -- --- Agrupar las recetas
-    -- This_MOD.GroupRecipes()
+    --- Agrupar las recetas
+    This_MOD.closer_together()
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
@@ -267,6 +267,9 @@ function This_MOD.setting_mod()
         }
     }
     This_MOD.new_order["intermediate-products"] = {
+        ["aid-kit"] = {
+            { type = "capsule", pattern = "aid-kit" },
+        },
         ["recipes-crude-oil"] = {
             { type = "recipe", name = "basic-oil-processing" },
             { type = "recipe", name = "advanced-oil-processing" },
@@ -284,7 +287,12 @@ function This_MOD.setting_mod()
             { type = "item",    name = "copper-ore" },
             { type = "item",    name = "uranium-ore" },
             { type = "capsule", name = "raw-fish" },
-            { type = "item",    name = "ice" }
+            { type = "capsule", name = "raw-fish" }
+        },
+        ["kr-raw-resource"] = {
+            { type = "item",    name = "kr-sand" },
+            { type = "item",    name = "kr-imersite" },
+            { type = "item",    name = "kr-rare-metal-ore" }
         },
         ["raw-material"] = {
             { type = "item", name = "iron-plate" },
@@ -295,7 +303,42 @@ function This_MOD.setting_mod()
             { type = "item", name = "sulfur" },
             { type = "item", name = "battery" },
             { type = "item", name = "explosives" },
-            { type = "item", name = "carbon" }
+            { type = "item", name = "carbon" },
+        },
+        ["kr-raw-material"] = {
+            { type = "item", name = "kr-coke" },
+            { type = "item", name = "kr-glass" },
+            { type = "item", name = "kr-fertilizer" },
+            { type = "item", name = "kr-biomass" },
+            { type = "item", name = "kr-quartz" },
+            { type = "item", name = "kr-silicon" },
+            { type = "item", name = "kr-rare-metals" },
+            { type = "item", name = "kr-imersium-plate" },
+            { type = "item", name = "kr-lithium-chloride" },
+            { type = "item", name = "kr-lithium" },
+            { type = "item", name = "kr-lithium-sulfur-battery" },
+            { type = "item", name = "kr-imersite-powder" },
+            { type = "item", name = "kr-tritium" }
+        },
+        ["kr-enriched"] = {
+            { type = "item", name = "kr-enriched-iron" },
+            { type = "item", name = "kr-enriched-copper" },
+            { type = "item", name = "kr-enriched-rare-metals" },
+            { type = "recipe", name = "kr-enriched-iron" },
+            { type = "recipe", name = "kr-enriched-copper" },
+            { type = "recipe", name = "kr-enriched-rare-metals" }
+        },
+        ["kr-fluids"] = {
+            { type = "recipe", name = "kr-water-from-atmosphere" },
+            { type = "recipe", name = "kr-filter-iron-ore-from-dirty-water" },
+            { type = "recipe", name = "kr-filter-copper-ore-from-dirty-water" },
+            { type = "recipe", name = "kr-filter-rare-metal-ore-from-dirty-water" },
+            { type = "recipe", name = "kr-coal-filtration" }
+        },
+        ["kr-fuel"] = {
+            { type = "item", name = "kr-fuel" },
+            { type = "item", name = "kr-biofuel" },
+            { type = "item", name = "kr-advanced-fuel" }
         },
         ["recipes-empty-barrels"] = {
             { type = "recipe", pattern = "empty-" }
@@ -330,6 +373,19 @@ function This_MOD.setting_mod()
             { type = "recipe", name = "nuclear-fuel-reprocessing" },
             { type = "recipe", name = "uranium-processing" },
             { type = "recipe", name = "kovarex-enrichment-process" }
+        },
+        ["kr-matter-to"] = {
+            { type = "recipe", pattern = "kr-matter-to-" }
+        },
+        ["-to-matter"] = {
+            { type = "recipe", pattern = "-to-matter" }
+        },
+        ["kr-electric-components"] = {
+            { type = "item",   pattern = "kr-inserter-part" },
+            { type = "item",   pattern = "kr-electronic-components" }
+        },
+        ["kr-crush"] = {
+            { type = "recipe", pattern = "kr-crush-" }
         },
         ["vulcanus"] = {
             { type = "item", name = "calcite" },
@@ -371,21 +427,26 @@ function This_MOD.setting_mod()
         ["science-pack-othres"] = {
             { type = "tool", pattern = "-science-pack" }
         },
+        ["kr-to-lab"] = {
+            { type = "item", pattern = "-tech-card" },
+            { type = "item", pattern = "-research-data" },
+            { type = "tool", pattern = "-tech-card" }
+        },
         ["science-pack-vanilla"] = {
-            { type = "tool", pattern = "automation-science-pack" },
-            { type = "tool", pattern = "logistic-science-pack" },
-            { type = "tool", pattern = "military-science-pack" },
-            { type = "tool", pattern = "chemical-science-pack" },
-            { type = "tool", pattern = "production-science-pack" },
-            { type = "tool", pattern = "utility-science-pack" },
-            { type = "tool", pattern = "space-science-pack" }
+            { type = "tool", name = "automation-science-pack" },
+            { type = "tool", name = "logistic-science-pack" },
+            { type = "tool", name = "military-science-pack" },
+            { type = "tool", name = "chemical-science-pack" },
+            { type = "tool", name = "production-science-pack" },
+            { type = "tool", name = "utility-science-pack" },
+            { type = "tool", name = "space-science-pack" }
         },
         ["science-pack-space-age"] = {
-            { type = "tool", pattern = "metallurgic-science-pack" },
-            { type = "tool", pattern = "electromagnetic-science-pack" },
-            { type = "tool", pattern = "agricultural-science-pack" },
-            { type = "tool", pattern = "cryogenic-science-pack" },
-            { type = "tool", pattern = "promethium-science-pack" }
+            { type = "tool", name = "metallurgic-science-pack" },
+            { type = "tool", name = "electromagnetic-science-pack" },
+            { type = "tool", name = "agricultural-science-pack" },
+            { type = "tool", name = "cryogenic-science-pack" },
+            { type = "tool", name = "promethium-science-pack" }
         }
     }
     This_MOD.new_order["combat"] = {
@@ -916,7 +977,6 @@ end
 --- Re-ordenar los objetivos
 function This_MOD.sort_items()
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-    GPrefix.var_dump(This_MOD.new_order)
 
     --- Darle el un formato para facilitar la busqueda
     for i = #This_MOD.new_order, 1, -1 do
@@ -975,40 +1035,48 @@ function This_MOD.sort_items()
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
 
----------------------------------------------------------------------------------------------------
-
 --- Hacer algunas correciones
-function This_MOD.Correct()
-    --- Ocultar las recetas para vaciar los barriles
-    local RecipesEmptyBarrels = This_MOD.new_order["intermediate-products"]
-    RecipesEmptyBarrels = RecipesEmptyBarrels["recipes-empty-barrels"]
-    for _, Recipe in pairs(RecipesEmptyBarrels) do
-        Recipe.subgroup = This_MOD.subgroup
-        Recipe.allow_decomposition = false
-        Recipe.hide_from_signal_gui = false
-        Recipe.hide_from_player_crafting = true
-        Recipe.factoriopedia_alternative = 'barrel'
-    end
+function This_MOD.correct()
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    ---> Ocultar las recetas para vaciar los barriles
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    local Empty_barrels = This_MOD.new_order
+    Empty_barrels = GPrefix.get_table(Empty_barrels, "name", "intermediate-products")
+    Empty_barrels = GPrefix.get_table(Empty_barrels, "name", "recipes-empty-barrels")
 
-    --- Eliminar subgroup y order
-    for _, Entity in pairs(data.raw['combat-robot']) do
-        Entity.subgroup = nil
-        Entity.order = nil
+    for _, recipe in pairs(Empty_barrels[1]) do
+        -- recipe.subgroup = This_MOD.subgroup
+        recipe.allow_decomposition = false
+        recipe.hide_from_signal_gui = false
+        recipe.hide_from_player_crafting = true
+        recipe.factoriopedia_alternative = 'barrel'
     end
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    ---> Eliminar subgroup y order
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    for _, entity in pairs(data.raw['combat-robot']) do
+        entity.subgroup = nil
+        entity.order = nil
+    end
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
 
 --- Agrupar las recetas
-function This_MOD.GroupRecipes()
-    for Name, Recipes in pairs(GPrefix.Recipes) do
-        local Item = GPrefix.Items[Name]
+function This_MOD.closer_together()
+    for name, recipes in pairs(GPrefix.Recipes) do
+        local Item = GPrefix.Items[name]
         if Item then
             Item.order = Item.order or "0"
-            local NewOrder = tonumber(Item.order) or 0
-            for _, Recipe in pairs(Recipes) do
-                if #Recipe.results == 1 then
-                    Recipe.subgroup = Item.subgroup
-                    Recipe.order = GPrefix.pad_left(#Item.order, NewOrder)
-                    NewOrder = NewOrder + 1
+            local New_order = tonumber(Item.order) or 0
+            for _, recipe in pairs(recipes) do
+                if #recipe.results == 1 then
+                    recipe.subgroup = Item.subgroup
+                    recipe.order = GPrefix.pad_left_zeros(#Item.order, New_order)
+                    New_order = New_order + 1
                 end
             end
         end
@@ -1025,7 +1093,5 @@ end
 
 --- Iniciar el modulo
 This_MOD.start()
--- GPrefix.var_dump(This_MOD.new_order)
--- ERROR()
 
 ---------------------------------------------------------------------------------------------------
