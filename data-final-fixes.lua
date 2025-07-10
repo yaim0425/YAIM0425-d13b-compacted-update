@@ -40,8 +40,8 @@ function This_MOD.start()
     --- Re-ordenar los subgroups
     This_MOD.sort_subgroups()
 
-    -- --- Re-ordenar los objetivos
-    -- This_MOD.SortTarget()
+    --- Re-ordenar los objetivos
+    This_MOD.sort_items()
 
     -- --- Hacer algunas correciones
     -- This_MOD.Correct()
@@ -455,6 +455,20 @@ function This_MOD.setting_mod()
             { type = "fluid", name = "fusion-plasma" }
         }
     }
+    This_MOD.new_order["enemies"] = {
+        ["biter"] = {
+            { type = "unit", pattern = "-biter" }
+        },
+        ["spitter"] = {
+            { type = "unit", pattern = "-spitter" }
+        },
+        ["worm"] = {
+            { type = "turret", pattern = "-worm-turret" }
+        },
+        ["spawner"] = {
+            { type = "unit-spawner", pattern = "-spawner" }
+        },
+    }
 
     --- Fusionar los resultados de los filtros
     This_MOD.join = {
@@ -478,28 +492,6 @@ end
 
 
 
-
----------------------------------------------------------------------------------------------------
-
---- Eliminar los subgroup vacios
-function This_MOD.delete_empty_subgroups()
-    --- Eliminar los subgroup vacios
-    for _, groups in pairs(This_MOD.new_order) do
-        local Remove = {}
-
-        --- Buscar los vacios
-        for key, subgroup in pairs(groups) do
-            if GPrefix.get_length(subgroup) == 0 then
-                Remove[key] = true
-            end
-        end
-
-        --- Borrar los vacios
-        for key, _ in pairs(Remove) do
-            groups[key] = nil
-        end
-    end
-end
 
 ---------------------------------------------------------------------------------------------------
 
@@ -668,8 +660,6 @@ function This_MOD.apply_filters()
                 --- Recorrer los elementos
                 for _, elemet in pairs(data.raw[Filter.type] or {}) do
                     if not elemet.hidden then
-                        elemet.factoriopedia_simulation = nil
-
                         if Pattern then
                             --- Filtrar por patron
                             if Pattern ~= "." and string.find(elemet.name, Pattern) then
@@ -771,11 +761,11 @@ function This_MOD.only_last()
 
     --- Darle el un formato para facilitar la busqueda
     for i = 1, #This_MOD.new_order, 1 do
-        local subgroups = This_MOD.new_order[i]
-        for j = 1, #subgroups, 1 do
-            local subgroup = subgroups[j]
-            for k = 1, #subgroup, 1 do
-                local Results = subgroup[k]
+        local Groups = This_MOD.new_order[i]
+        for j = 1, #Groups, 1 do
+            local Subgroup = Groups[j]
+            for k = 1, #Subgroup, 1 do
+                local Results = Subgroup[k]
                 for l = 1, #Results, 1 do
                     local Element = Results[l]
                     --- --- --- --- --- --- --- --- --- ---
@@ -851,7 +841,7 @@ function This_MOD.split_big_taget()
 
                 --- Validar filtro y separar los filtros "grandes"
                 if #Results > 2 and k > 1 then
-                    Subgroup[k] = nil
+                    table.remove(Subgroup, k)
                     table.insert(Group, j + 1, {
                         name = Subgroup.name .. "-" .. k,
                         Results
@@ -869,14 +859,14 @@ function This_MOD.sort_subgroups()
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
     --- Variables a usar
-    local Group = {}
+    local Source = {}
     local Orders = {}
 
     --- Agrupar los subgroups
     for _, subgroup in pairs(GPrefix.subgroups) do
         --- --- --- --- --- --- --- --- --- --- --- --- ---
-        Group[subgroup.group] = Group[subgroup.group] or {}
-        table.insert(Group[subgroup.group], subgroup)
+        Source[subgroup.group] = Source[subgroup.group] or {}
+        table.insert(Source[subgroup.group], subgroup)
         --- --- --- --- --- --- --- --- --- --- --- --- ---
         Orders[subgroup.group] = Orders[subgroup.group] or {}
         table.insert(Orders[subgroup.group], subgroup.order)
@@ -892,7 +882,7 @@ function This_MOD.sort_subgroups()
 
         --- Cargar los subgrupos
         local New_group = GPrefix.get_table(This_MOD.new_order, "name", group_name)
-        local Old_subgroups = Group[group_name]
+        local Old_subgroups = Source[group_name]
 
         --- Cantiad de nuevos subgrupos
         local Count = #(New_group or {})
@@ -905,12 +895,12 @@ function This_MOD.sort_subgroups()
 
         --- Crear los nuevos subgrupos
         for i = 1, Count, 1 do
-            data:extend({{
+            data:extend({ {
                 type = "item-subgroup",
                 name = GPrefix.name .. "-" .. New_group[i].name,
                 group = group_name,
                 order = GPrefix.pad_left_zeros(Digits, i) .. "0"
-            }})
+            } })
         end
 
         --- Actualizar el order de los viejos subgrupos
@@ -923,69 +913,69 @@ function This_MOD.sort_subgroups()
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
 
----------------------------------------------------------------------------------------------------
-
 --- Re-ordenar los objetivos
-function This_MOD.SortTarget()
-    --- Cambiar los orders para ordenarlo luego
-    for _, Subgroups in pairs(This_MOD.new_order) do
-        for _, Subgroup in pairs(Subgroups) do
-            for i, Elements in pairs(Subgroup) do
-                for _, Element in pairs(Elements) do
-                    if Element.subgroup then
-                        Element.order = Element.order or ""
-                        local newOrder = Element.subgroup
-                        newOrder = This_MOD.subgroups[newOrder].order
-                        newOrder = newOrder .. "-"
-                        newOrder = newOrder .. GPrefix.pad_left(2, i) .. "-"
-                        newOrder = newOrder .. Element.order
-                        Element.order = newOrder
-                    end
+function This_MOD.sort_items()
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    GPrefix.var_dump(This_MOD.new_order)
+
+    --- Darle el un formato para facilitar la busqueda
+    for i = #This_MOD.new_order, 1, -1 do
+        local Groups = This_MOD.new_order[i]
+        for j = #Groups, 1, -1 do
+            local Subgroup = Groups[j]
+
+            --- --- --- --- --- --- --- --- --- --- --- ---
+            ---> Variables a usar
+            --- --- --- --- --- --- --- --- --- --- --- ---
+            local Source = {} --- Elementos del subgrupo
+            local Orders = {} --- Orden a usar
+            --- --- --- --- --- --- --- --- --- --- --- ---
+
+            for k = #Subgroup, 1, -1 do
+                local Results = Subgroup[k]
+                for l = #Results, 1, -1 do
+                    local Element = Results[l]
+                    --- --- --- --- --- --- --- --- --- ---
+                    ---> Formato deseado
+                    --- --- --- --- --- --- --- --- --- ---
+                    Element.order = Element.order or ""
+                    local New_order = Element.subgroup
+                    New_order = New_order and GPrefix.subgroups[New_order].order or ""
+                    New_order = New_order .. "-"
+                    New_order = New_order .. GPrefix.pad_left_zeros(2, k) .. "-"
+                    New_order = New_order .. Element.order
+                    Element.order = New_order
+                    --- --- --- --- --- --- --- --- --- ---
+
+
+
+                    --- --- --- --- --- --- --- --- --- ---
+                    ---> Separarlos valores
+                    --- --- --- --- --- --- --- --- --- ---
+                    table.insert(Orders, New_order)
+                    table.insert(Source, Element)
+                    --- --- --- --- --- --- --- --- --- ---
                 end
             end
+
+            --- --- --- --- --- --- --- --- --- --- --- ---
+            ---> Ordenar los elementos
+            --- --- --- --- --- --- --- --- --- --- --- ---
+            table.sort(Orders)
+            local Digits = #Orders + 1
+            for key, order in pairs(Orders) do
+                local Element = GPrefix.get_table(Source, "order", order)
+                Element.order = GPrefix.pad_left_zeros(Digits, key) .. "0"
+                Element.subgroup = GPrefix.name .. "-" .. Subgroup.name
+            end
+            --- --- --- --- --- --- --- --- --- --- --- ---
         end
     end
 
-    --- Ordenar los elementos
-    for _, Subgroups in pairs(This_MOD.new_order) do
-        for Name, Elements in pairs(Subgroups) do
-            --- Contenedor temporal
-            local NewOrder = {}
-            local NewSort = {}
-
-            --- Obtener los orders
-            for _, Subgroup in pairs(Elements) do
-                for _, Element in pairs(Subgroup) do
-                    if Element.subgroup then
-                        NewSort[Element.order] = Element
-                        table.insert(NewOrder, Element.order)
-                    end
-                end
-            end
-
-            --- Ordenar
-            table.sort(NewOrder)
-
-            --- Establecer el nuevo order
-            local newSubgroup = {}
-            Subgroups[Name] = newSubgroup
-            for _, order in pairs(NewOrder) do
-                table.insert(newSubgroup, NewSort[order])
-            end
-        end
-    end
-
-    --- Actualizar el order
-    for _, subgroups in pairs(This_MOD.new_order) do
-        for subgroup, elements in pairs(subgroups) do
-            local Digits = GPrefix.digit_count(#elements) + 1
-            for key, element in pairs(elements) do
-                element.subgroup = This_MOD.prefix .. subgroup
-                element.order = GPrefix.pad_left(Digits, key) .. "0"
-            end
-        end
-    end
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
+
+---------------------------------------------------------------------------------------------------
 
 --- Hacer algunas correciones
 function This_MOD.Correct()
@@ -1017,8 +1007,8 @@ function This_MOD.GroupRecipes()
             for _, Recipe in pairs(Recipes) do
                 if #Recipe.results == 1 then
                     Recipe.subgroup = Item.subgroup
-                    Recipe.order    = GPrefix.pad_left(#Item.order, NewOrder)
-                    NewOrder        = NewOrder + 1
+                    Recipe.order = GPrefix.pad_left(#Item.order, NewOrder)
+                    NewOrder = NewOrder + 1
                 end
             end
         end
@@ -1036,6 +1026,6 @@ end
 --- Iniciar el modulo
 This_MOD.start()
 -- GPrefix.var_dump(This_MOD.new_order)
-ERROR()
+-- ERROR()
 
 ---------------------------------------------------------------------------------------------------
