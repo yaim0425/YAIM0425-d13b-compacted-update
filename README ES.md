@@ -33,3 +33,5 @@ El objetivo principal es **mejorar la organización** de los objetos y recetas d
 ![](./img/Screenshot%20(2).png)
 ![](./img/Screenshot%20(3).png)
 ![](./img/Screenshot%20(4).png)
+![](./img/Screenshot%20(5).png)
+![](./img/Screenshot%20(6).png)
