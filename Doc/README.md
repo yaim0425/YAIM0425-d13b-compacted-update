@@ -29,9 +29,9 @@ El objetivo principal es **mejorar la organización** de los objetos y recetas d
 - [`zzzYAIM0425 0000 lib`](https://github.com/yaim0425/zzzYAIM0425-0000-lib)  
   Este MOD **es obligatorio** para que la lógica de ordenamiento funcione correctamente.
 
-![](./Doc/base/Screenshot%20(1).png)
-![](./Doc/base/Screenshot%20(2).png)
-![](./Doc/base/Screenshot%20(3).png)
-![](./Doc/base/Screenshot%20(4).png)
-![](./Doc/base/Screenshot%20(5).png)
-![](./Doc/base/Screenshot%20(6).png)
+![](./base/Screenshot%20(1).png)
+![](./base/Screenshot%20(2).png)
+![](./base/Screenshot%20(3).png)
+![](./base/Screenshot%20(4).png)
+![](./base/Screenshot%20(5).png)
+![](./base/Screenshot%20(6).png)
