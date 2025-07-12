@@ -1,6 +1,6 @@
 ![](./thumbnail.png)
 
-# 🧩 `zzzYAIM0425 0100 sort items`
+# 🧩 `zzzYAIM0425 0100 sort items` [![Bandera de España](https://flagcdn.com/20x15/es.png)](./Doc/README.md)
 
 Este repositorio contiene el MOD `zzzYAIM0425-0100-sort-items`, encargado de **reordenar objetos y recetas** en Factorio siguiendo criterios definidos por el usuario **yaim0425**.
 
