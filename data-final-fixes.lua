@@ -980,11 +980,11 @@ function This_MOD.sort_subgroups()
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
-    --- Crear los subgrupos
+    --- Buscar y crear los subgrupos ignorados
     for _, New_group in pairs(This_MOD.new_order) do
-        if New_group.load then
-            New_group.load = nil
-        else
+
+        --- Crear los subgrupos ignorados
+        if not New_group.load then
             --- Digitos a usar
             local Digits = GPrefix.digit_count(#New_group) + 1
 
@@ -998,7 +998,14 @@ function This_MOD.sort_subgroups()
                 } })
             end
         end
+
+        --- Eliminar el indicador de los no ignorados
+        if New_group.load then
+            New_group.load = nil
+        end
     end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
 
 --- Re-ordenar los objetivos
