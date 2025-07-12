@@ -1,6 +1,6 @@
 ![](./thumbnail.png)
 
-# 🧩 `zzzYAIM0425 0100 sort items`
+# 🧩 `zzzYAIM0425 0100 sort items` [![Bandera de España](https://flagcdn.com/20x15/es.png)](./Doc/README.md)
 
 This repository contains the MOD `zzzYAIM0425-0100-sort-items`, responsible for **sorting items and recipes** in Factorio according to custom criteria defined by the user **yaim0425**.
 
