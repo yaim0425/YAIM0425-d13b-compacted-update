@@ -951,8 +951,7 @@ function This_MOD.sort_subgroups()
 
         --- Eliminar el grupo recorrido
         if New_group then
-            local i = GPrefix.get_key(This_MOD.new_order, New_group)
-            table.remove(This_MOD.new_order, i)
+            New_group.load = true
             Count = #New_group
         end
 
@@ -983,17 +982,21 @@ function This_MOD.sort_subgroups()
 
     --- Crear los subgrupos
     for _, New_group in pairs(This_MOD.new_order) do
-        --- Digitos a usar
-        local Digits = GPrefix.digit_count(#New_group) + 1
+        if New_group.load then
+            New_group.load = nil
+        else
+            --- Digitos a usar
+            local Digits = GPrefix.digit_count(#New_group) + 1
 
-        --- Crear los nuevos subgrupos
-        for i = 1, #New_group, 1 do
-            data:extend({ {
-                type = "item-subgroup",
-                name = GPrefix.name .. "-" .. New_group[i].name,
-                group = New_group.name,
-                order = GPrefix.pad_left_zeros(Digits, i) .. "0"
-            } })
+            --- Crear los nuevos subgrupos
+            for i = 1, #New_group, 1 do
+                data:extend({ {
+                    type = "item-subgroup",
+                    name = GPrefix.name .. "-" .. New_group[i].name,
+                    group = New_group.name,
+                    order = GPrefix.pad_left_zeros(Digits, i) .. "0"
+                } })
+            end
         end
     end
 end
