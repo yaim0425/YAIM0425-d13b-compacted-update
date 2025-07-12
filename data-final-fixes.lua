@@ -1020,7 +1020,7 @@ function This_MOD.sort_items()
             ---> Ordenar los elementos
             --- --- --- --- --- --- --- --- --- --- --- ---
             table.sort(Orders)
-            local Digits = #Orders + 1
+            local Digits = GPrefix.digit_count(#Orders) + 1
             for key, order in pairs(Orders) do
                 local Element = GPrefix.get_table(Source, "order", order)
                 Element.order = GPrefix.pad_left_zeros(Digits, key) .. "0"
