@@ -291,9 +291,9 @@ function This_MOD.setting_mod()
             { type = "capsule", name = "raw-fish" }
         },
         ["kr-raw-resource"] = {
-            { type = "item",    name = "kr-sand" },
-            { type = "item",    name = "kr-imersite" },
-            { type = "item",    name = "kr-rare-metal-ore" }
+            { type = "item", name = "kr-sand" },
+            { type = "item", name = "kr-imersite" },
+            { type = "item", name = "kr-rare-metal-ore" }
         },
         ["raw-material"] = {
             { type = "item", name = "iron-plate" },
@@ -322,9 +322,9 @@ function This_MOD.setting_mod()
             { type = "item", name = "kr-tritium" }
         },
         ["kr-enriched"] = {
-            { type = "item", name = "kr-enriched-iron" },
-            { type = "item", name = "kr-enriched-copper" },
-            { type = "item", name = "kr-enriched-rare-metals" },
+            { type = "item",   name = "kr-enriched-iron" },
+            { type = "item",   name = "kr-enriched-copper" },
+            { type = "item",   name = "kr-enriched-rare-metals" },
             { type = "recipe", name = "kr-enriched-iron" },
             { type = "recipe", name = "kr-enriched-copper" },
             { type = "recipe", name = "kr-enriched-rare-metals" }
@@ -382,8 +382,8 @@ function This_MOD.setting_mod()
             { type = "recipe", pattern = "-to-matter" }
         },
         ["kr-electric-components"] = {
-            { type = "item",   pattern = "kr-inserter-part" },
-            { type = "item",   pattern = "kr-electronic-components" }
+            { type = "item", pattern = "kr-inserter-part" },
+            { type = "item", pattern = "kr-electronic-components" }
         },
         ["kr-crush"] = {
             { type = "recipe", pattern = "kr-crush-" }
@@ -947,7 +947,14 @@ function This_MOD.sort_subgroups()
         local Old_subgroups = Source[group_name]
 
         --- Cantiad de nuevos subgrupos
-        local Count = #(New_group or {})
+        local Count = 0
+
+        --- Eliminar el grupo recorrido
+        if New_group then
+            local i = GPrefix.get_key(This_MOD.new_order, New_group)
+            table.remove(This_MOD.new_order, i)
+            Count = #New_group
+        end
 
         --- Digitos a usar
         local Digits = 0
@@ -973,6 +980,22 @@ function This_MOD.sort_subgroups()
     end
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    --- Crear los subgrupos
+    for _, New_group in pairs(This_MOD.new_order) do
+        --- Digitos a usar
+        local Digits = GPrefix.digit_count(#New_group) + 1
+
+        --- Crear los nuevos subgrupos
+        for i = 1, #New_group, 1 do
+            data:extend({ {
+                type = "item-subgroup",
+                name = GPrefix.name .. "-" .. New_group[i].name,
+                group = New_group.name,
+                order = GPrefix.pad_left_zeros(Digits, i) .. "0"
+            } })
+        end
+    end
 end
 
 --- Re-ordenar los objetivos
@@ -1089,5 +1112,7 @@ end
 
 --- Iniciar el modulo
 This_MOD.start()
+-- GPrefix.var_dump(GPrefix.subgroups)
+-- GPrefix.var_dump(data.raw["item-group"])
 
 ---------------------------------------------------------------------------------------------------
