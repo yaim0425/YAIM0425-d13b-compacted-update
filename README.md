@@ -1,6 +1,6 @@
 ![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/thumbnail.png)
 
-# 🧩 `zzzYAIM0425 0100 sort items` [![Spanish Flag](https://flagcdn.com/20x15/es.png)](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/blob/main/Doc/base/README.md)
+# 🧩 `zzzYAIM0425 0100 sort items` [![Spanish Flag](https://flagcdn.com/20x15/es.png)](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/blob/main/Doc/README.md)
 
 `zzzYAIM0425-0100-sort-items` is a MOD responsible for **sorting items and recipes** in Factorio according to custom criteria defined by the user [`yaim0425`](https://github.com/yaim0425).
 
