@@ -637,8 +637,6 @@ function This_MOD.order_guns_and_ammos()
 
 
 
-
-
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
     ---> Agregar municiones y entidades
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -674,8 +672,6 @@ function This_MOD.order_guns_and_ammos()
 
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-
-
 
 
 
@@ -798,6 +794,8 @@ end
 
 --- Fusionar los resultados de los filtros indicados
 function This_MOD.join_filters()
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
     for _, join in pairs(This_MOD.join) do
         local Group = GPrefix.get_table(This_MOD.new_order, "name", join.group)
         local Subgroup = GPrefix.get_table(Group, "name", join.subgroup)
@@ -812,6 +810,8 @@ function This_MOD.join_filters()
         end
         table.insert(Subgroup, join.filters[1], Aux)
     end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
 
 --- Eliminar los elementos duplicados - dejar el último
@@ -893,6 +893,8 @@ end
 
 --- Separar los filtros "grandes"
 function This_MOD.split_big_taget()
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
     for i = #This_MOD.new_order, 1, -1 do
         local Group = This_MOD.new_order[i]
         for j = #Group, 1, -1 do
@@ -914,6 +916,8 @@ function This_MOD.split_big_taget()
             end
         end
     end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
 
 --- Re-ordenar los subgroups
@@ -1010,6 +1014,8 @@ end
 
 --- Re-ordenar los objetivos
 function This_MOD.sort_items()
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
     for i = #This_MOD.new_order, 1, -1 do
         local Groups = This_MOD.new_order[i]
         for j = #Groups, 1, -1 do
@@ -1062,6 +1068,8 @@ function This_MOD.sort_items()
             --- --- --- --- --- --- --- --- --- --- --- ---
         end
     end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
 
 --- Hacer algunas correciones
@@ -1069,6 +1077,7 @@ function This_MOD.correct()
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
     ---> Ocultar las recetas para vaciar los barriles
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
     local Empty_barrels = This_MOD.new_order
     Empty_barrels = GPrefix.get_table(Empty_barrels, "name", "intermediate-products")
     Empty_barrels = GPrefix.get_table(Empty_barrels, "name", "recipes-empty-barrels")
@@ -1080,6 +1089,7 @@ function This_MOD.correct()
         recipe.hide_from_player_crafting = true
         recipe.factoriopedia_alternative = 'barrel'
     end
+
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
 
@@ -1087,15 +1097,19 @@ function This_MOD.correct()
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
     ---> Eliminar subgroup y order
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
     for _, entity in pairs(data.raw['combat-robot']) do
         entity.subgroup = nil
         entity.order = nil
     end
+
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
 
 --- Agrupar las recetas
 function This_MOD.closer_together()
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
     for name, recipes in pairs(GPrefix.Recipes) do
         local Item = GPrefix.Items[name]
         if Item then
@@ -1110,6 +1124,8 @@ function This_MOD.closer_together()
             end
         end
     end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
 
 ---------------------------------------------------------------------------------------------------
