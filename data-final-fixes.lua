@@ -595,7 +595,7 @@ function This_MOD.order_guns_and_ammos()
 
     --- Filtrar las armas
     local Guns_by_type = {}
-    for _, gun in pairs(GPrefix.Items) do
+    for _, gun in pairs(GPrefix.items) do
         local ammo = gun.attack_parameters and gun.attack_parameters.ammo_category or nil
         if ammo then
             local type = Guns_by_type[ammo] or {}
@@ -770,7 +770,7 @@ function This_MOD.apply_filters()
                     --- Buscar elementos
                     if Element.minable and Element.minable.results then
                         Items = Element.minable.results
-                    elseif GPrefix.Equipments[Element.name] then
+                    elseif GPrefix.equipments[Element.name] then
                         Items = { Element }
                     end
 
@@ -778,7 +778,7 @@ function This_MOD.apply_filters()
                     if Items then
                         table.remove(Results, l)
                         for _, item in pairs(Items) do
-                            local Item = GPrefix.Items[item.name]
+                            local Item = GPrefix.items[item.name]
                             if Item then table.insert(Results, Item) end
                         end
                     end
@@ -1110,8 +1110,8 @@ end
 function This_MOD.closer_together()
     --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
-    for name, recipes in pairs(GPrefix.Recipes) do
-        local Item = GPrefix.Items[name]
+    for name, recipes in pairs(GPrefix.recipes) do
+        local Item = GPrefix.items[name]
         if Item then
             Item.order = Item.order or "0"
             local New_order = tonumber(Item.order) or 0
