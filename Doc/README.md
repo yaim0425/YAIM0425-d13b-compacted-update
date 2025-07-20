@@ -4,7 +4,8 @@
 
 `zzzYAIM0425-0100-sort-items` es un MOD encargado de **ordenar ítems y recetas** en Factorio según criterios personalizados definidos por el usuario [`yaim0425`](https://github.com/yaim0425).
 
-> 🔧 Este MOD depende de [`zzzYAIM0425 0000 lib`](https://github.com/yaim0425/zzzYAIM0425-0000-lib), que se gestiona automáticamente como parte del sistema.  
+> 🧩 Este MOD forma parte de la [serie `zzzYAIM0425`](https://github.com/yaim0425), desarrollada para ofrecer mejoras modulares y utilidades que enriquecen la experiencia de juego.  
+> 🔧 Depende de [`zzzYAIM0425 0000 lib`](https://github.com/yaim0425/zzzYAIM0425-0000-lib), el cual se gestiona automáticamente por el sistema.  
 > Todo su contenido está disponible para quien lo necesite; estoy abierto a cambios, correcciones y sugerencias.
 
 ## 📦 Propósito
