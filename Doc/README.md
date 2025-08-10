@@ -28,9 +28,9 @@ El objetivo principal es **mejorar la organización** de ítems y recetas en el 
 
 ## 🖼️ Capturas
 
-![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/base/Screenshot%20(1).png)  
-![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/base/Screenshot%20(2).png)  
-![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/base/Screenshot%20(3).png)  
-![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/base/Screenshot%20(4).png)  
-![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/base/Screenshot%20(5).png)  
-![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/base/Screenshot%20(6).png)
+![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/base/(1).png)  
+![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/base/(2).png)  
+![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/base/(3).png)  
+![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/base/(4).png)  
+![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/base/(5).png)  
+![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/base/(6).png)
