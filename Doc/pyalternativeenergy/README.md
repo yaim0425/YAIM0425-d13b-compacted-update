@@ -1,0 +1,6 @@
+![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/pyalternativeenergy/(1).png)  
+![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/pyalternativeenergy/(2).png)  
+![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/pyalternativeenergy/(3).png)  
+![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/pyalternativeenergy/(4).png)  
+![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/pyalternativeenergy/(5).png)  
+![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/pyalternativeenergy/(6).png)  

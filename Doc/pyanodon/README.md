@@ -1,6 +1,0 @@
-![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/pyanodon/(1).png)  
-![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/pyanodon/(2).png)  
-![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/pyanodon/(3).png)  
-![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/pyanodon/(4).png)  
-![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/pyanodon/(5).png)  
-![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/pyanodon/(6).png)  
