@@ -569,7 +569,7 @@ function This_MOD.set_format()
         table.insert(This_MOD.after_format, Space)
         --- --- --- --- --- --- --- --- --- --- --- --- ---
         for subgroup_name, subgroup in pairs(subgroups) do
-            subgroup = util.copy(subgroup)
+            subgroup = GPrefix.copy(subgroup)
             table.insert(Space, subgroup)
             subgroup.name = subgroup_name
         end
