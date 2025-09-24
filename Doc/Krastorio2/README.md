@@ -1,6 +1,0 @@
-![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/Krastorio2/(1).png)  
-![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/Krastorio2/(2).png)  
-![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/Krastorio2/(3).png)  
-![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/Krastorio2/(4).png)  
-![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/Krastorio2/(5).png)  
-![](https://github.com/yaim0425/zzzYAIM0425-0100-sort-items/raw/main/Doc/Krastorio2/(6).png)  
