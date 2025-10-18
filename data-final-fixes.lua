@@ -7,6 +7,19 @@
 
 
 ---------------------------------------------------------------------------
+---[ Información del MOD debendiente ]---
+---------------------------------------------------------------------------
+
+local That_MOD = GMOD.d12b
+if not That_MOD then return end
+
+---------------------------------------------------------------------------
+
+
+
+
+
+---------------------------------------------------------------------------
 ---[ Información del MOD ]---
 ---------------------------------------------------------------------------
 
@@ -98,21 +111,26 @@ function This_MOD.get_elements()
 
         --- Validar el tipo
         if recipe.type ~= "recipe" then return end
-        if GMOD.has_id(recipe, "d12b") then return end
-        if GMOD.get_tables(This_MOD.to_be_processed, nil, recipe) then return end
+        if not GMOD.has_id(recipe.name, That_MOD.id) then return end
 
-        --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+        --- Validar contenido
+        if #recipe.ingredients ~= 1 then return end
+        if #recipe.results ~= 1 then return end
 
+        --- Renombrar
+        local Result = GMOD.items[recipe.results[1].name]
+        local Ingredient = GMOD.items[recipe.ingredients[1].name]
 
+        --- Validar si ya fue procesado
+        local Space = {}
+        Space = This_MOD.to_be_processed[recipe.type] or {}
+        Space = Space[Ingredient.name] or {}
+        if Space.recipe_do == recipe or Space.recipe_undo == recipe then return end
 
-
-
-        --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-        --- Valores a usar
-        --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-
-        local Ingredient = GMOD.items[recipe.results[1].name]
-        local Result = GMOD.items[recipe.ingredients[1].name]
+        local Name = recipe.name:gsub(That_MOD.id .. "%-", This_MOD.id .. "-")
+        Name = Name:gsub(That_MOD.category_do .. "%-", "")
+        Name = Name:gsub(That_MOD.category_undo .. "%-", "")
+        if GMOD.items[Name] then return end
 
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
@@ -124,17 +142,13 @@ function This_MOD.get_elements()
         --- Valores para el proceso
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
-        local Space
-        Space = GMOD.get_tables(This_MOD.to_be_processed, nil, Ingredient)
-        Space = Space and Space[1] or {}
-
-        if GMOD.has_id(recipe.name, GMOD.d12b.category_do) then
+        if GMOD.has_id(recipe.name, That_MOD.category_do) then
             Space.recipe_do = recipe
             Space.item_do = Space.item_do or Result
             Space.item_undo = Space.item_undo or Ingredient
         end
 
-        if GMOD.has_id(recipe.name, GMOD.d12b.category_undo) then
+        if GMOD.has_id(recipe.name, That_MOD.category_undo) then
             Space.recipe_undo = recipe
             Space.item_do = Space.item_do or Ingredient
             Space.item_undo = Space.item_undo or Result
@@ -151,8 +165,8 @@ function This_MOD.get_elements()
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
         This_MOD.to_be_processed[recipe.type] = This_MOD.to_be_processed[recipe.type] or {}
-        This_MOD.to_be_processed[recipe.type][Space.item_undo] = Space
-        This_MOD.to_be_processed[recipe.type][Space.item_do] = Space
+        This_MOD.to_be_processed[recipe.type][Ingredient.name] = Space
+        This_MOD.to_be_processed[recipe.type][Result.name] = Space
 
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
     end
@@ -187,5 +201,5 @@ end
 This_MOD.start()
 
 ---------------------------------------------------------------------------
-GMOD.var_dump(This_MOD.to_be_processed)
+-- GMOD.var_dump(This_MOD.to_be_processed)
 ERROR()
