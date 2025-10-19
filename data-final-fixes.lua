@@ -125,7 +125,8 @@ function This_MOD.get_elements()
         local Space = {}
         Space = This_MOD.to_be_processed[recipe.type] or {}
         Space = Space[Ingredient.name] or {}
-        if Space.recipe_do == recipe or Space.recipe_undo == recipe then return end
+        if Space.recipe_do == recipe then return end
+        if Space.recipe_undo == recipe then return end
 
         local Name = recipe.name:gsub(That_MOD.id .. "%-", This_MOD.id .. "-")
         Name = Name:gsub(That_MOD.category_do .. "%-", "")
