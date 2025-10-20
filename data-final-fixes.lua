@@ -187,6 +187,10 @@ function This_MOD.reference_values()
         ["movement-bonus-equipment"] = return_equipment,
     }
 
+    --- Efectos por tipo
+    This_MOD.effect_to_type = {
+    }
+
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
 
