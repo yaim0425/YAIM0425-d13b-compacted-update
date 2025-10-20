@@ -46,7 +46,7 @@ function This_MOD.start()
             --- Crear los elementos
             This_MOD.create_item(space)
             This_MOD.create_entity(space)
-            -- This_MOD.create_recipe(space)
+            This_MOD.create_recipe(space)
             -- This_MOD.create_tech(space)
 
             --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -100,7 +100,7 @@ function This_MOD.reference_values()
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
     --- Lista de entidades a ignorar
-    This_MOD.ignore_entities = {
+    This_MOD.ignore_to_name = {
         --- Space Exploration
         ["se-space-pipe-long-j-3"] = true,
         ["se-space-pipe-long-j-5"] = true,
@@ -129,7 +129,7 @@ function This_MOD.reference_values()
     local function return_equipment(space) return space.equipment end
 
     --- Validar por tipo
-    This_MOD.validate_type = {
+    This_MOD.validate_to_type = {
         --- Entities
         ["lab"] = return_entity,
         ["gate"] = return_entity,
@@ -285,8 +285,8 @@ function This_MOD.get_elements()
         elseif Item.place_result then
             Space.entity = GMOD.entities[Item.place_result]
             if not Space.entity then return end
-            if This_MOD.ignore_entities[Space.entity.name] then return end
-            local Validate = This_MOD.validate_type[Space.entity.type]
+            if This_MOD.ignore_to_name[Space.entity.name] then return end
+            local Validate = This_MOD.validate_to_type[Space.entity.type]
             if not Validate then return end
             Space.entity = Validate(Space)
             if not Space.entity then return end
@@ -314,19 +314,6 @@ function This_MOD.get_elements()
         This_MOD.to_be_processed[recipe.type][Name] = Space
 
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-    end
-
-    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-
-
-
-
-
-    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-    --- Validaciones
-    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-
-    local function validate_ele()
     end
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -511,6 +498,33 @@ function This_MOD.create_entity(space)
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
     GMOD.extend(Entity)
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+end
+
+function This_MOD.create_recipe(space)
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Validación
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    if not space.recipe_do then return end
+    if not space.recipe_undo then return end
+
+    if data.raw.recipe[space.recipe_do] then return end
+    if data.raw.recipe[space.recipe_undo] then return end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Cambiar algunas propiedades
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    space.recipe_do.results[1].name = space.name
+    space.recipe_do.ingredients[1].name = space.name
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
