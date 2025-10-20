@@ -146,17 +146,29 @@ function This_MOD.get_elements()
         local Item = GMOD.items[recipe.ingredients[1].name]
         local Item_do = GMOD.items[recipe.results[1].name]
 
+        --- Calcular la cantidad
+        local Amount = d12b.setting.amount
+        if d12b.setting.stack_size then
+            Amount = Amount * Item.stack_size
+            if Amount > 65000 then
+                Amount = 65000
+            end
+        end
+
         --- Validar si ya fue procesado
         local That_MOD =
             GMOD.get_id_and_name(Item_do.name) or
             { ids = "-", name = Item_do.name }
 
-        local Name =
+        local Prefix =
             GMOD.name .. That_MOD.ids ..
-            This_MOD.id .. "-" ..
-            That_MOD.name
+            This_MOD.id .. "-" .. (
+                d12b.setting.stack_size and
+                Item.stack_size .. "x" .. d12b.setting.amount or
+                Amount
+            ) .. "u-"
 
-        if GMOD.items[Name] then return end
+        if GMOD.items[Prefix .. That_MOD.name] then return end
 
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
@@ -170,17 +182,12 @@ function This_MOD.get_elements()
 
         local Space = {}
 
-        Space.name = Name
-        Space.prefix =
-            GMOD.name .. That_MOD.ids ..
-            This_MOD.id .. "-" .. (
-                d12b.setting.stack_size and
-                Item.stack_size .. "x" .. d12b.setting.amount or
-                Space.amount
-            ) .. "u-"
+        Space.name = Prefix .. That_MOD.name
 
-        Space.item_do = Item_do
         Space.item = Item
+        Space.amount = Amount
+        Space.prefix = Prefix
+        Space.item_do = Item_do
 
         Space.recipe_do = recipe
         Space.recipe_undo = recipe.name:gsub(
@@ -220,7 +227,7 @@ function This_MOD.get_elements()
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
         This_MOD.to_be_processed[recipe.type] = This_MOD.to_be_processed[recipe.type] or {}
-        This_MOD.to_be_processed[recipe.type][Name] = Space
+        This_MOD.to_be_processed[recipe.type][Prefix .. That_MOD.name] = Space
 
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
     end
@@ -396,20 +403,14 @@ function This_MOD.create_entity(space)
 
     --- Siguiente tier
     Entity.next_upgrade = (function(entity)
-        -- if true then return end
         --- Validación
         if not entity then return end
 
-        --- Procesar el nombre
-        local That_MOD =
-            GMOD.get_id_and_name(entity) or
-            { ids = "-", name = entity }
-
         --- Nombre despues del aplicar el MOD
-        local Name = space.prefix .. That_MOD.name
-        -- GMOD.name .. That_MOD.ids ..
-        -- This_MOD.id .. "-" ..
-        -- That_MOD.name
+        local Name = space.prefix .. (
+            GMOD.get_id_and_name(entity) or
+            { name = entity }
+        ).name
 
         --- La entidad ya existe
         if GMOD.entities[Name] then return Name end
