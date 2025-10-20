@@ -99,15 +99,92 @@ function This_MOD.reference_values()
     --- Valores de la referencia en este MOD
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
-    --- Lista de tipos a ignorar
-    This_MOD.ignore_types = {
-        ["electric-pole"] = true,
-    }
-
     --- Lista de entidades a ignorar
     This_MOD.ignore_entities = {
         --- Space Exploration
-        ["se-"] = true,
+        ["se-space-pipe-long-j-3"] = true,
+        ["se-space-pipe-long-j-5"] = true,
+        ["se-space-pipe-long-j-7"] = true,
+        ["se-space-pipe-long-s-9"] = true,
+        ["se-space-pipe-long-s-15"] = true,
+
+        ["se-condenser-turbine"] = true,
+        ["se-energy-transmitter-emitter"] = true,
+        ["se-energy-transmitter-injector"] = true,
+        ["se-core-miner-drill"] = true,
+
+        ["se-delivery-cannon"] = true,
+        ["se-spaceship-rocket-engine"] = true,
+        ["se-spaceship-ion-engine"] = true,
+        ["se-spaceship-antimatter-engine"] = true,
+
+        ["se-meteor-point-defence-container"] = true,
+        ["se-meteor-defence-container"] = true,
+        ["se-delivery-cannon-weapon"] = true,
+        ["shield-projector"] = true
+    }
+
+    --- Funciones basicas
+    local function return_entity(space) return space.entity end
+    local function return_equipment(space) return space.equipment end
+
+    --- Validar por tipo
+    This_MOD.validate_type = {
+        --- Entities
+        ["lab"] = return_entity,
+        ["gate"] = return_entity,
+        ["pump"] = return_entity,
+        ["wall"] = return_entity,
+        ["radar"] = return_entity,
+        ["beacon"] = return_entity,
+        ["boiler"] = return_entity,
+        ["furnace"] = return_entity,
+        ["reactor"] = return_entity,
+        ["inserter"] = return_entity,
+        ["splitter"] = return_entity,
+        ["generator"] = return_entity,
+        ["loader-1x1"] = return_entity,
+        ["locomotive"] = return_entity,
+        ["cargo-wagon"] = return_entity,
+        ["fluid-wagon"] = return_entity,
+        ["repair-tool"] = return_entity,
+        ["solar-panel"] = return_entity,
+        ["mining-drill"] = return_entity,
+        ["storage-tank"] = return_entity,
+        ["electric-pole"] = return_entity,
+        ["lane-splitter"] = return_entity,
+        ["logistic-robot"] = return_entity,
+        ["pipe-to-ground"] = return_entity,
+        ["transport-belt"] = return_entity,
+        ["electric-turret"] = return_entity,
+        ["underground-belt"] = return_entity,
+        ["assembling-machine"] = return_entity,
+        ["construction-robot"] = return_entity,
+        ["active-defense-equipment"] = return_entity,
+
+        ["accumulator"] = function(space)
+            if not space.entity.energy_source then return end
+            if not space.entity.energy_source.output_flow_limit then return end
+            local Energy = space.entity.energy_source.output_flow_limit
+            Energy = GMOD.number_unit(Energy)
+            if not Energy then return end
+            return space.entity
+        end,
+
+        --- Tile
+        ["tile"] = function(space) return space.title end,
+
+        --- Items
+        ["module"] = function(space) return space.module end,
+        ["ammo"] = function(space) return space.ammo end,
+
+        --- Equipment
+        ["battery-equipment"] = return_equipment,
+        ["roboport-equipment"] = return_equipment,
+        ["generator-equipment"] = return_equipment,
+        ["solar-panel-equipment"] = return_equipment,
+        ["energy-shield-equipment"] = return_equipment,
+        ["movement-bonus-equipment"] = return_equipment,
     }
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -128,7 +205,7 @@ function This_MOD.get_elements()
     --- Función para analizar cada entidad
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
-    local function valide_recipe(recipe)
+    local function validate_recipe(recipe)
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
         --- Validación
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -208,8 +285,11 @@ function This_MOD.get_elements()
         elseif Item.place_result then
             Space.entity = GMOD.entities[Item.place_result]
             if not Space.entity then return end
-            if This_MOD.ignore_types[Space.entity.type] then return end
             if This_MOD.ignore_entities[Space.entity.name] then return end
+            local Validate = This_MOD.validate_type[Space.entity.type]
+            if not Validate then return end
+            Space.entity = Validate(Space)
+            if not Space.entity then return end
 
             Space.localised_name = Space.entity.localised_name
             Space.localised_description = Space.entity.localised_description
@@ -243,11 +323,24 @@ function This_MOD.get_elements()
 
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Validaciones
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    local function validate_ele()
+    end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
     --- Preparar los datos a usar
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
     for _, recipe in pairs(data.raw.recipe) do
-        valide_recipe(recipe)
+        validate_recipe(recipe)
     end
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -298,32 +391,10 @@ function This_MOD.create_item(space)
     Item.icons = GMOD.copy(space.item_do.icons)
     local Icon = GMOD.get_tables(Item.icons, "icon", d12b.indicator.icon)[1]
     Icon.icon = This_MOD.indicator.icon
-    Icon.shift = This_MOD.indicator.shift
 
-    --- Nombre del nuevo subgrupo
-    Item.subgroup = space.item_do.subgroup:gsub(d12b.id .. "%-", This_MOD.id .. "-")
-
-    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-
-
-
-
-
-    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-    --- Crear el subgrupo para el objeto
-    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-
-    --- Duplicar el subgrupo
-    if not GMOD.subgroups[Item.subgroup] then
-        GMOD.duplicate_subgroup(space.item.subgroup, Item.subgroup)
-
-        --- Renombrar
-        local Subgroup = GMOD.subgroups[Item.subgroup]
-        local Order = GMOD.subgroups[space.item.subgroup].order
-
-        --- Actualizar el order
-        Subgroup.order = 1 .. Order:sub(2)
-    end
+    --- Actualizar subgroup y order
+    Item.subgroup = space.item_do.subgroup
+    Item.order = space.item_do.order
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
