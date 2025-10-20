@@ -53,6 +53,9 @@ function This_MOD.start()
         end
     end
 
+    --- Fijar las posiciones actual
+    GMOD.d00b.change_orders()
+
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
 
@@ -87,6 +90,27 @@ function This_MOD.reference_values()
     }
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Valores de la referencia en este MOD
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    --- Lista de tipos a ignorar
+    This_MOD.ignore_types = {
+        ["electric-pole"] = true,
+    }
+
+    --- Lista de entidades a ignorar
+    This_MOD.ignore_entities = {
+        --- Space Exploration
+        ["se-"] = true,
+    }
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
 
 ---------------------------------------------------------------------------
@@ -112,25 +136,26 @@ function This_MOD.get_elements()
         --- Validar el tipo
         if recipe.type ~= "recipe" then return end
         if not GMOD.has_id(recipe.name, d12b.id) then return end
+        if not GMOD.has_id(recipe.name, d12b.category_do) then return end
 
         --- Validar contenido
         if #recipe.ingredients ~= 1 then return end
         if #recipe.results ~= 1 then return end
 
         --- Renombrar
-        local Result = GMOD.items[recipe.results[1].name]
-        local Ingredient = GMOD.items[recipe.ingredients[1].name]
+        local Item = GMOD.items[recipe.ingredients[1].name]
+        local Item_do = GMOD.items[recipe.results[1].name]
 
         --- Validar si ya fue procesado
-        local Space = {}
-        Space = This_MOD.to_be_processed[recipe.type] or {}
-        Space = Space[Ingredient.name] or {}
-        if Space.recipe_do == recipe then return end
-        if Space.recipe_undo == recipe then return end
+        local That_MOD =
+            GMOD.get_id_and_name(Item_do.name) or
+            { ids = "-", name = Item_do.name }
 
-        local Name = recipe.name:gsub(d12b.id .. "%-", This_MOD.id .. "-")
-        Name = Name:gsub(d12b.category_do .. "%-", "")
-        Name = Name:gsub(d12b.category_undo .. "%-", "")
+        local Name =
+            GMOD.name .. That_MOD.ids ..
+            This_MOD.id .. "-" ..
+            That_MOD.name
+
         if GMOD.items[Name] then return end
 
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -143,27 +168,42 @@ function This_MOD.get_elements()
         --- Valores para el proceso
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
-        Space.name = Space.name or Name
+        local Space = {}
 
-        if GMOD.has_id(recipe.name, d12b.category_do) then
-            Space.recipe_do = recipe
-            Space.item_do = Space.item_do or Result
-            Space.item = Space.item or Ingredient
-        end
+        Space.name = Name
+        Space.prefix =
+            GMOD.name .. That_MOD.ids ..
+            This_MOD.id .. "-" .. (
+                d12b.setting.stack_size and
+                Item.stack_size .. "x" .. d12b.setting.amount or
+                Space.amount
+            ) .. "u-"
 
-        if GMOD.has_id(recipe.name, d12b.category_undo) then
-            Space.recipe_undo = recipe
-            Space.item_do = Space.item_do or Ingredient
-            Space.item = Space.item or Result
-        end
+        Space.item_do = Item_do
+        Space.item = Item
 
-        if Space.item.place_as_tile then
-            Space.title = Space.title or GMOD.entities[Space.item.place_as_tile]
+        Space.recipe_do = recipe
+        Space.recipe_undo = recipe.name:gsub(
+            d12b.category_do .. "%-",
+            d12b.category_undo .. "-"
+        )
+        Space.recipe_undo = data.raw.recipe[Space.recipe_undo]
+
+        --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+        if Item.place_as_tile then
+            -- Space.title = Space.title or GMOD.entities[Item.place_as_tile]
             return
-        elseif Space.item.place_result then
-            Space.entity = Space.entity or GMOD.entities[Space.item.place_result]
-        elseif Space.item.place_as_equipment_result then
-            Space.equipment = Space.equipment or GMOD.equipments[Space.item.place_as_equipment_result]
+        elseif Item.place_result then
+            Space.entity = GMOD.entities[Item.place_result]
+            if not Space.entity then return end
+            if This_MOD.ignore_types[Space.entity.type] then return end
+            if This_MOD.ignore_entities[Space.entity.name] then return end
+
+            Space.localised_name = Space.entity.localised_name
+            Space.localised_description = Space.entity.localised_description
+        elseif Item.place_as_equipment_result then
+            -- Space.equipment = Space.equipment or GMOD.equipments[Item.place_as_equipment_result]
             return
         else
             return
@@ -180,8 +220,7 @@ function This_MOD.get_elements()
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
         This_MOD.to_be_processed[recipe.type] = This_MOD.to_be_processed[recipe.type] or {}
-        This_MOD.to_be_processed[recipe.type][Ingredient.name] = Space
-        This_MOD.to_be_processed[recipe.type][Result.name] = Space
+        This_MOD.to_be_processed[recipe.type][Name] = Space
 
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
     end
@@ -238,18 +277,20 @@ function This_MOD.create_item(space)
     Item.name = space.name
 
     --- Apodo y descripción
-    Item.localised_name = GMOD.copy(space.entity.localised_name)
-    Item.localised_description = GMOD.copy(space.entity.localised_description)
+    Item.localised_name = GMOD.copy(space.localised_name)
+    Item.localised_description = GMOD.copy(space.localised_description)
 
     --- Entidad a crear
     Item.place_result = space.name
 
     --- Agregar indicador del MOD
+    Item.icons = GMOD.copy(space.item_do.icons)
     local Icon = GMOD.get_tables(Item.icons, "icon", d12b.indicator.icon)[1]
     Icon.icon = This_MOD.indicator.icon
+    Icon.shift = This_MOD.indicator.shift
 
     --- Nombre del nuevo subgrupo
-    Item.subgroup = Item.subgroup:gsub(d12b.id .. "%-", This_MOD.id .. "-")
+    Item.subgroup = space.item_do.subgroup:gsub(d12b.id .. "%-", This_MOD.id .. "-")
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
@@ -334,14 +375,17 @@ function This_MOD.create_entity(space)
     Entity.name = space.name
 
     --- Apodo y descripción
-    Entity.localised_name = GMOD.copy(space.entity.localised_name)
-    Entity.localised_description = GMOD.copy(space.entity.localised_description)
+    Entity.localised_name = GMOD.copy(space.localised_name)
+    Entity.localised_description = GMOD.copy(space.localised_description)
 
     --- Elimnar propiedades inecesarias
     Entity.factoriopedia_simulation = nil
 
     --- Cambiar icono
     Entity.icons = GMOD.items[space.name].icons
+
+    --- Actualizar el nuevo subgrupo
+    Entity.subgroup = GMOD.items[space.name].subgroup
 
     --- Objeto a minar
     Entity.minable.results = { {
@@ -352,21 +396,28 @@ function This_MOD.create_entity(space)
 
     --- Siguiente tier
     Entity.next_upgrade = (function(entity)
+        -- if true then return end
         --- Validación
         if not entity then return end
 
+        --- Procesar el nombre
+        local That_MOD =
+            GMOD.get_id_and_name(entity) or
+            { ids = "-", name = entity }
+
         --- Nombre despues del aplicar el MOD
-        local Name = entity:gsub(d12b.id .. "%-", This_MOD.id .. "-")
+        local Name = space.prefix .. That_MOD.name
+        -- GMOD.name .. That_MOD.ids ..
+        -- This_MOD.id .. "-" ..
+        -- That_MOD.name
 
         --- La entidad ya existe
-        if GMOD.entities[Name] then
-            return Name
-        end
+        if GMOD.entities[Name] then return Name end
 
         --- La entidad existirá
         for _, Spaces in pairs(This_MOD.to_be_processed) do
             for _, Space in pairs(Spaces) do
-                if Space.entity.name == entity then
+                if Space.entity and Space.entity.name == entity then
                     return Name
                 end
             end
