@@ -397,8 +397,8 @@ function This_MOD.create_item(space)
     ---- Eliminar el objeto anterior
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
-    -- GMOD.items[space.item_do.name] = nil
-    -- data.raw.item[space.item_do.name] = nil
+    GMOD.items[space.item_do.name] = nil
+    data.raw.item[space.item_do.name] = nil
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
