@@ -160,15 +160,12 @@ function This_MOD.get_elements()
             GMOD.get_id_and_name(Item_do.name) or
             { ids = "-", name = Item_do.name }
 
-        local Prefix =
+        local Name =
             GMOD.name .. That_MOD.ids ..
-            This_MOD.id .. "-" .. (
-                d12b.setting.stack_size and
-                Item.stack_size .. "x" .. d12b.setting.amount or
-                Amount
-            ) .. "u-"
+            This_MOD.id .. "-" ..
+            That_MOD.name
 
-        if GMOD.items[Prefix .. That_MOD.name] then return end
+        if GMOD.items[Name] then return end
 
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
@@ -182,12 +179,19 @@ function This_MOD.get_elements()
 
         local Space = {}
 
-        Space.name = Prefix .. That_MOD.name
+        Space.name = Name
 
         Space.item = Item
         Space.amount = Amount
-        Space.prefix = Prefix
         Space.item_do = Item_do
+
+        Space.prefix =
+            GMOD.name .. That_MOD.ids ..
+            This_MOD.id .. "-" .. (
+                d12b.setting.stack_size and
+                Item.stack_size .. "x" .. d12b.setting.amount or
+                Amount
+            ) .. "u-"
 
         Space.recipe_do = recipe
         Space.recipe_undo = recipe.name:gsub(
@@ -227,7 +231,7 @@ function This_MOD.get_elements()
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
         This_MOD.to_be_processed[recipe.type] = This_MOD.to_be_processed[recipe.type] or {}
-        This_MOD.to_be_processed[recipe.type][Prefix .. That_MOD.name] = Space
+        This_MOD.to_be_processed[recipe.type][Name] = Space
 
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
     end
