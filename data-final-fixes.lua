@@ -281,6 +281,8 @@ function This_MOD.get_elements()
         )
         Space.recipe_undo = data.raw.recipe[Space.recipe_undo]
 
+        Space.tech = GMOD.get_technology({ Space.recipe_undo }, true)
+
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
         if Item.place_as_tile then
