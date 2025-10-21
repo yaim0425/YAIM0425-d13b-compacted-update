@@ -189,98 +189,98 @@ function This_MOD.reference_values()
     --- Efectos por tipo
     This_MOD.effect_to_type = {
         --- Entities
-        ["accumulator"] = function(space, Entity)
+        ["accumulator"] = function(space, entity)
         end,
 
-        ["assembling-machine"] = function(space, Entity)
+        ["assembling-machine"] = function(space, entity)
         end,
 
-        ["beacon"] = function(space, Entity)
+        ["beacon"] = function(space, entity)
         end,
 
-        ["boiler"] = function(space, Entity)
+        ["boiler"] = function(space, entity)
         end,
 
-        ["cargo-wagon"] = function(space, Entity)
+        ["cargo-wagon"] = function(space, entity)
         end,
 
-        ["construction-robot"] = function(space, Entity)
-            Entity.speed = space.amount * Entity.speed
-            Entity.max_payload_size = space.amount * Entity.max_payload_size
+        ["construction-robot"] = function(space, entity)
+            entity.speed = space.amount * entity.speed
+            entity.max_payload_size = space.amount * entity.max_payload_size
         end,
 
-        ["electric-turret"] = function(space, Entity)
+        ["electric-turret"] = function(space, entity)
         end,
 
-        ["fluid-wagon"] = function(space, Entity)
+        ["fluid-wagon"] = function(space, entity)
         end,
 
-        ["furnace"] = function(space, Entity)
+        ["furnace"] = function(space, entity)
         end,
 
-        ["gate"] = function(space, Entity)
+        ["gate"] = function(space, entity)
         end,
 
-        ["generator"] = function(space, Entity)
+        ["generator"] = function(space, entity)
         end,
 
-        ["inserter"] = function(space, Entity)
+        ["inserter"] = function(space, entity)
         end,
 
-        ["lab"] = function(space, Entity)
+        ["lab"] = function(space, entity)
         end,
 
-        ["lane-splitter"] = function(space, Entity)
+        ["lane-splitter"] = function(space, entity)
         end,
 
-        ["loader-1x1"] = function(space, Entity)
+        ["loader-1x1"] = function(space, entity)
         end,
 
-        ["locomotive"] = function(space, Entity)
+        ["locomotive"] = function(space, entity)
         end,
 
-        ["logistic-robot"] = function(space, Entity)
-            Entity.speed = space.amount * Entity.speed
-            Entity.max_payload_size = space.amount * Entity.max_payload_size
+        ["logistic-robot"] = function(space, entity)
+            entity.speed = space.amount * entity.speed
+            entity.max_payload_size = space.amount * entity.max_payload_size
         end,
 
-        ["mining-drill"] = function(space, Entity)
+        ["mining-drill"] = function(space, entity)
         end,
 
-        ["pipe-to-ground"] = function(space, Entity)
+        ["pipe-to-ground"] = function(space, entity)
         end,
 
-        ["pump"] = function(space, Entity)
+        ["pump"] = function(space, entity)
         end,
 
-        ["radar"] = function(space, Entity)
+        ["radar"] = function(space, entity)
         end,
 
-        ["reactor"] = function(space, Entity)
+        ["reactor"] = function(space, entity)
         end,
 
-        ["repair-tool"] = function(space, Entity)
+        ["repair-tool"] = function(space, entity)
         end,
 
-        ["solar-panel"] = function(space, Entity)
-            local Value, Unit = GMOD.number_unit(Entity.production)
-            Entity.production = (space.amount * Value) .. Unit
+        ["solar-panel"] = function(space, entity)
+            local Value, Unit = GMOD.number_unit(entity.production)
+            entity.production = (space.amount * Value) .. Unit
         end,
 
-        ["splitter"] = function(space, Entity)
+        ["splitter"] = function(space, entity)
         end,
 
-        ["storage-tank"] = function(space, Entity)
-            Entity.fluid_box.volume = space.amount * Entity.fluid_box.volume
+        ["storage-tank"] = function(space, entity)
+            entity.fluid_box.volume = space.amount * entity.fluid_box.volume
         end,
 
-        ["transport-belt"] = function(space, Entity)
+        ["transport-belt"] = function(space, entity)
         end,
 
-        ["underground-belt"] = function(space, Entity)
+        ["underground-belt"] = function(space, entity)
         end,
 
-        ["wall"] = function(space, Entity)
+        ["wall"] = function(space, entity)
         end
     }
 
