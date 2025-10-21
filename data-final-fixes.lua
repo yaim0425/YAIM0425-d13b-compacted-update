@@ -329,6 +329,7 @@ function This_MOD.reference_values()
         end,
 
         ["roboport-equipment"] = function(space, equipment)
+            equipment.robot_limit = space.amount * equipment.robot_limit
         end,
 
         ["generator-equipment"] = function(space, equipment)
