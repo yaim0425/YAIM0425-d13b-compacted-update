@@ -286,7 +286,7 @@ function This_MOD.get_elements()
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
         if Item.place_as_tile then
-            -- Space.title = Space.title or GMOD.entities[Item.place_as_tile]
+            -- Space.title = GMOD.entities[Item.place_as_tile]
             return
         elseif Item.place_result then
             Space.entity = GMOD.entities[Item.place_result]
@@ -300,7 +300,7 @@ function This_MOD.get_elements()
             Space.localised_name = Space.entity.localised_name
             Space.localised_description = Space.entity.localised_description
         elseif Item.place_as_equipment_result then
-            -- Space.equipment = Space.equipment or GMOD.equipments[Item.place_as_equipment_result]
+            -- Space.equipment = GMOD.equipments[Item.place_as_equipment_result]
             return
         else
             return
@@ -492,6 +492,16 @@ function This_MOD.create_entity(space)
             end
         end
     end)(Entity.next_upgrade)
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Aplicar el efecto apropiado
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
