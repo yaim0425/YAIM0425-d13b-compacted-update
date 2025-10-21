@@ -335,6 +335,8 @@ function This_MOD.reference_values()
         end,
 
         ["solar-panel-equipment"] = function(space, equipment)
+            local Value, Unit = GMOD.number_unit(equipment.production)
+            equipment.production = (space.amount * Value) .. Unit
         end,
 
         ["energy-shield-equipment"] = function(space, equipment)
