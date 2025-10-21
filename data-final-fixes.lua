@@ -268,7 +268,9 @@ function This_MOD.reference_values()
         ["reactor"] = function(space, entity)
         end,
 
-        ["repair-tool"] = function(space, entity)
+        ["repair-tool"] = function(space, item)
+            item.speed = space.amount * item.speed
+            item.durability = space.amount * item.durability
         end,
 
         ["solar-panel"] = function(space, entity)
