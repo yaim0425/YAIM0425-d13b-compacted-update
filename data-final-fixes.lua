@@ -190,6 +190,15 @@ function This_MOD.reference_values()
     This_MOD.effect_to_type = {
         --- Entities
         ["accumulator"] = function(space, entity)
+            local energy = entity.energy_source
+            for _, propiety in pairs({
+                "buffer_capacity",
+                "input_flow_limit",
+                "output_flow_limit"
+            }) do
+                local Value, Unit = GMOD.number_unit(energy[propiety])
+                energy[propiety] = (space.amount * Value) .. Unit
+            end
         end,
 
         ["assembling-machine"] = function(space, entity)
