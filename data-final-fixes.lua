@@ -528,7 +528,10 @@ function This_MOD.create_recipe(space)
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
     space.recipe_do.results[1].name = space.name
-    space.recipe_do.ingredients[1].name = space.name
+    space.recipe_undo.ingredients[1].name = space.name
+
+    GMOD.recipes[space.name] = GMOD.recipes[space.item_do.name]
+    GMOD.recipes[space.item_do.name] = nil
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
