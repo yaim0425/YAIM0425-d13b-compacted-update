@@ -678,10 +678,3 @@ end
 This_MOD.start()
 
 ---------------------------------------------------------------------------
-
-local Table = {}
-for key, _ in pairs(This_MOD.effect_to_type) do
-    table.insert(Table, key)
-end
-table.sort(Table)
-GMOD.var_dump(Table)
