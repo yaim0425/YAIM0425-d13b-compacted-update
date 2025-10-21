@@ -125,6 +125,7 @@ function This_MOD.reference_values()
     }
 
     --- Funciones basicas
+    local function return_item(space) return space.item end
     local function return_entity(space) return space.entity end
     local function return_equipment(space) return space.equipment end
 
@@ -152,7 +153,6 @@ function This_MOD.reference_values()
         ["pump"] = return_entity,
         ["radar"] = return_entity,
         ["reactor"] = return_entity,
-        ["repair-tool"] = return_entity,
         ["solar-panel"] = return_entity,
         ["splitter"] = return_entity,
         ["storage-tank"] = return_entity,
@@ -173,8 +173,9 @@ function This_MOD.reference_values()
         ["tile"] = function(space) return space.title end,
 
         --- Items
-        ["ammo"] = function(space) return space.ammo end,
-        ["module"] = function(space) return space.module end,
+        ["ammo"] = return_item,
+        ["module"] = return_item,
+        ["repair-tool"] = return_item,
 
         --- Equipment
         ["active-defense-equipment"] = return_equipment,
@@ -268,11 +269,6 @@ function This_MOD.reference_values()
         ["reactor"] = function(space, entity)
         end,
 
-        ["repair-tool"] = function(space, item)
-            item.speed = space.amount * item.speed
-            item.durability = space.amount * item.durability
-        end,
-
         ["solar-panel"] = function(space, entity)
             local Value, Unit = GMOD.number_unit(entity.production)
             entity.production = (space.amount * Value) .. Unit
@@ -292,7 +288,44 @@ function This_MOD.reference_values()
         end,
 
         ["wall"] = function(space, entity)
-        end
+        end,
+
+        --- Items
+        ["ammo"] = function(space, item)
+        end,
+
+        ["module"] = function(space, item)
+        end,
+
+        ["repair-tool"] = function(space, item)
+            item.speed = space.amount * item.speed
+            item.durability = space.amount * item.durability
+        end,
+
+        --- Tile
+        ["tile"] = function(space) return space["tile"] end,
+
+        --- Equipment
+        ["active-defense-equipment"] = function (spaces, equipment)
+        end,
+
+        ["battery-equipment"] = function (spaces, equipment)
+        end,
+
+        ["roboport-equipment"] = function (spaces, equipment)
+        end,
+
+        ["generator-equipment"] = function (spaces, equipment)
+        end,
+
+        ["solar-panel-equipment"] = function (spaces, equipment)
+        end,
+
+        ["energy-shield-equipment"] = function (spaces, equipment)
+        end,
+
+        ["movement-bonus-equipment"] = function (spaces, equipment)
+        end,
     }
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
