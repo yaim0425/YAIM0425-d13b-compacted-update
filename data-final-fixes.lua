@@ -322,25 +322,25 @@ function This_MOD.reference_values()
         end,
 
         --- Equipment
-        ["active-defense-equipment"] = function(spaces, equipment)
+        ["active-defense-equipment"] = function(space, equipment)
         end,
 
-        ["battery-equipment"] = function(spaces, equipment)
+        ["battery-equipment"] = function(space, equipment)
         end,
 
-        ["roboport-equipment"] = function(spaces, equipment)
+        ["roboport-equipment"] = function(space, equipment)
         end,
 
-        ["generator-equipment"] = function(spaces, equipment)
+        ["generator-equipment"] = function(space, equipment)
         end,
 
-        ["solar-panel-equipment"] = function(spaces, equipment)
+        ["solar-panel-equipment"] = function(space, equipment)
         end,
 
-        ["energy-shield-equipment"] = function(spaces, equipment)
+        ["energy-shield-equipment"] = function(space, equipment)
         end,
 
-        ["movement-bonus-equipment"] = function(spaces, equipment)
+        ["movement-bonus-equipment"] = function(space, equipment)
         end,
     }
 
