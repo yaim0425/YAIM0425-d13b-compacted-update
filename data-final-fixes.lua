@@ -131,36 +131,34 @@ function This_MOD.reference_values()
     --- Validar por tipo
     This_MOD.validate_to_type = {
         --- Entities
-        ["lab"] = return_entity,
-        ["gate"] = return_entity,
-        ["pump"] = return_entity,
-        ["wall"] = return_entity,
-        ["radar"] = return_entity,
+        ["assembling-machine"] = return_entity,
         ["beacon"] = return_entity,
         ["boiler"] = return_entity,
+        ["cargo-wagon"] = return_entity,
+        ["construction-robot"] = return_entity,
+        ["electric-turret"] = return_entity,
+        ["fluid-wagon"] = return_entity,
         ["furnace"] = return_entity,
-        ["reactor"] = return_entity,
-        ["inserter"] = return_entity,
-        ["splitter"] = return_entity,
+        ["gate"] = return_entity,
         ["generator"] = return_entity,
+        ["inserter"] = return_entity,
+        ["lab"] = return_entity,
+        ["lane-splitter"] = return_entity,
         ["loader-1x1"] = return_entity,
         ["locomotive"] = return_entity,
-        ["cargo-wagon"] = return_entity,
-        ["fluid-wagon"] = return_entity,
+        ["logistic-robot"] = return_entity,
+        ["mining-drill"] = return_entity,
+        ["pipe-to-ground"] = return_entity,
+        ["pump"] = return_entity,
+        ["radar"] = return_entity,
+        ["reactor"] = return_entity,
         ["repair-tool"] = return_entity,
         ["solar-panel"] = return_entity,
-        ["mining-drill"] = return_entity,
+        ["splitter"] = return_entity,
         ["storage-tank"] = return_entity,
-        ["electric-pole"] = return_entity,
-        ["lane-splitter"] = return_entity,
-        ["logistic-robot"] = return_entity,
-        ["pipe-to-ground"] = return_entity,
         ["transport-belt"] = return_entity,
-        ["electric-turret"] = return_entity,
         ["underground-belt"] = return_entity,
-        ["assembling-machine"] = return_entity,
-        ["construction-robot"] = return_entity,
-        ["active-defense-equipment"] = return_entity,
+        ["wall"] = return_entity,
 
         ["accumulator"] = function(space)
             if not space.entity.energy_source then return end
@@ -175,10 +173,11 @@ function This_MOD.reference_values()
         ["tile"] = function(space) return space.title end,
 
         --- Items
-        ["module"] = function(space) return space.module end,
         ["ammo"] = function(space) return space.ammo end,
+        ["module"] = function(space) return space.module end,
 
         --- Equipment
+        ["active-defense-equipment"] = return_equipment,
         ["battery-equipment"] = return_equipment,
         ["roboport-equipment"] = return_equipment,
         ["generator-equipment"] = return_equipment,
@@ -189,6 +188,100 @@ function This_MOD.reference_values()
 
     --- Efectos por tipo
     This_MOD.effect_to_type = {
+        --- Entities
+        ["accumulator"] = function(space, Entity)
+        end,
+
+        ["assembling-machine"] = function(space, Entity)
+        end,
+
+        ["beacon"] = function(space, Entity)
+        end,
+
+        ["boiler"] = function(space, Entity)
+        end,
+
+        ["cargo-wagon"] = function(space, Entity)
+        end,
+
+        ["construction-robot"] = function(space, Entity)
+            Entity.speed = space.amount * Entity.speed
+            Entity.max_payload_size = space.amount * Entity.max_payload_size
+        end,
+
+        ["electric-turret"] = function(space, Entity)
+        end,
+
+        ["fluid-wagon"] = function(space, Entity)
+        end,
+
+        ["furnace"] = function(space, Entity)
+        end,
+
+        ["gate"] = function(space, Entity)
+        end,
+
+        ["generator"] = function(space, Entity)
+        end,
+
+        ["inserter"] = function(space, Entity)
+        end,
+
+        ["lab"] = function(space, Entity)
+        end,
+
+        ["lane-splitter"] = function(space, Entity)
+        end,
+
+        ["loader-1x1"] = function(space, Entity)
+        end,
+
+        ["locomotive"] = function(space, Entity)
+        end,
+
+        ["logistic-robot"] = function(space, Entity)
+            Entity.speed = space.amount * Entity.speed
+            Entity.max_payload_size = space.amount * Entity.max_payload_size
+        end,
+
+        ["mining-drill"] = function(space, Entity)
+        end,
+
+        ["pipe-to-ground"] = function(space, Entity)
+        end,
+
+        ["pump"] = function(space, Entity)
+        end,
+
+        ["radar"] = function(space, Entity)
+        end,
+
+        ["reactor"] = function(space, Entity)
+        end,
+
+        ["repair-tool"] = function(space, Entity)
+        end,
+
+        ["solar-panel"] = function(space, Entity)
+            local Value, Unit = GMOD.number_unit(Entity.production)
+            Entity.production = (space.amount * Value) .. Unit
+        end,
+
+        ["splitter"] = function(space, Entity)
+        end,
+
+        ["storage-tank"] = function(space, Entity)
+            Entity.fluid_box.volume = space.amount * Entity.fluid_box.volume
+        end,
+
+        ["transport-belt"] = function(space, Entity)
+        end,
+
+        ["underground-belt"] = function(space, Entity)
+        end,
+
+        ["wall"] = function(space, Entity)
+        end
     }
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -503,6 +596,8 @@ function This_MOD.create_entity(space)
     --- Aplicar el efecto apropiado
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
+    This_MOD.effect_to_type[Entity.type](space, Entity)
+
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
 
@@ -583,3 +678,10 @@ end
 This_MOD.start()
 
 ---------------------------------------------------------------------------
+
+local Table = {}
+for key, _ in pairs(This_MOD.effect_to_type) do
+    table.insert(Table, key)
+end
+table.sort(Table)
+GMOD.var_dump(Table)
