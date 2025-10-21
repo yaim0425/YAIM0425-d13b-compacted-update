@@ -305,20 +305,18 @@ function This_MOD.reference_values()
         --- Tile
         ["tile"] = function(space, tile)
             local i = space.amount - 1
-            local pollution = 0.005
-            local spores = 0.005
+            local pollution = 0
+            local spores = 0
 
             if tile.absorptions_per_second then
-                pollution = tile.absorptions_per_second.pollution or pollution
+                pollution = tile.absorptions_per_second.pollution or 0.005
                 if mods["space-age"] then
-                    spores = tile.absorptions_per_second.spores or spores
-                else
-                    spores = 0
+                    spores = tile.absorptions_per_second.spores or 0.005
                 end
             end
 
             tile.absorptions_per_second = {
-                spores = spores == 0 and spores * i or nil,
+                spores = spores ~= 0 and spores * i or nil,
                 pollution = pollution * i,
             }
         end,
