@@ -303,28 +303,46 @@ function This_MOD.reference_values()
         end,
 
         --- Tile
-        ["tile"] = function(space) return space["tile"] end,
+        ["tile"] = function(space, tile)
+            local i = space.amount - 1
+            local pollution = 0.005
+            local spores = 0.005
+
+            if tile.absorptions_per_second then
+                pollution = tile.absorptions_per_second.pollution or pollution
+                if mods["space-age"] then
+                    spores = tile.absorptions_per_second.spores or spores
+                else
+                    spores = 0
+                end
+            end
+
+            tile.absorptions_per_second = {
+                spores = spores == 0 and spores * i or nil,
+                pollution = pollution * i,
+            }
+        end,
 
         --- Equipment
-        ["active-defense-equipment"] = function (spaces, equipment)
+        ["active-defense-equipment"] = function(spaces, equipment)
         end,
 
-        ["battery-equipment"] = function (spaces, equipment)
+        ["battery-equipment"] = function(spaces, equipment)
         end,
 
-        ["roboport-equipment"] = function (spaces, equipment)
+        ["roboport-equipment"] = function(spaces, equipment)
         end,
 
-        ["generator-equipment"] = function (spaces, equipment)
+        ["generator-equipment"] = function(spaces, equipment)
         end,
 
-        ["solar-panel-equipment"] = function (spaces, equipment)
+        ["solar-panel-equipment"] = function(spaces, equipment)
         end,
 
-        ["energy-shield-equipment"] = function (spaces, equipment)
+        ["energy-shield-equipment"] = function(spaces, equipment)
         end,
 
-        ["movement-bonus-equipment"] = function (spaces, equipment)
+        ["movement-bonus-equipment"] = function(spaces, equipment)
         end,
     }
 
