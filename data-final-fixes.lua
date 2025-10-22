@@ -190,6 +190,7 @@ function This_MOD.reference_values()
     This_MOD.effect_to_type = {
         --- Entities
         ["accumulator"] = function(space, entity)
+            if not entity.energy_source then return end
             local energy = entity.energy_source
             for _, propiety in pairs({
                 "buffer_capacity",
@@ -257,28 +258,29 @@ function This_MOD.reference_values()
         end,
 
         ["pipe-to-ground"] = function(space, entity)
-            if entity.fluid_box and entity.fluid_box.pipe_connections then
-                local pipe_connections = entity.fluid_box.pipe_connections
-                for _, value in pairs(pipe_connections) do
-                    if value.max_underground_distance then
-                        value.max_underground_distance = space.amount * value.max_underground_distance
-                        if value.max_underground_distance > 255 then value.max_underground_distance = 255 end
+            if not entity.fluid_box then return end
+            if not entity.fluid_box.pipe_connections then return end
+            local pipe_connections = entity.fluid_box.pipe_connections
+            for _, value in pairs(pipe_connections) do
+                if value.max_underground_distance then
+                    value.max_underground_distance =
+                        space.amount * value.max_underground_distance
+                    if value.max_underground_distance > 255 then
+                        value.max_underground_distance = 255
                     end
                 end
             end
         end,
 
         ["pump"] = function(space, entity)
-            if entity.pumping_speed then
-                entity.pumping_speed = space.amount * entity.pumping_speed
-            end
+            if not entity.pumping_speed then return end
+            entity.pumping_speed = space.amount * entity.pumping_speed
         end,
 
         ["reactor"] = function(space, entity)
             local energy = entity.energy_source
-            if energy.type == "burner" then
-                energy.effectivity = space.amount * (energy.effectivity or 1)
-            end
+            if energy.type ~= "burner" then return end
+            energy.effectivity = space.amount * (energy.effectivity or 1)
         end,
 
         ["solar-panel"] = function(space, entity)
