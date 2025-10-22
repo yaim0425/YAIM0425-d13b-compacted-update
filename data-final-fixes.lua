@@ -356,6 +356,7 @@ function This_MOD.reference_values()
         end,
 
         ["movement-bonus-equipment"] = function(space, equipment)
+            equipment.movement_bonus = space.amount * equipment.movement_bonus
         end,
     }
 
