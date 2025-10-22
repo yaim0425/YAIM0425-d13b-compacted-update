@@ -328,7 +328,7 @@ function This_MOD.reference_values()
             end
 
             tile.absorptions_per_second = {
-                spores = spores ~= 0 and spores * i or nil,
+                spores = spores > 0 and spores * i or nil,
                 pollution = pollution * i,
             }
         end,
