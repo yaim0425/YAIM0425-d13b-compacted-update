@@ -257,6 +257,15 @@ function This_MOD.reference_values()
         end,
 
         ["pipe-to-ground"] = function(space, entity)
+            if entity.fluid_box and entity.fluid_box.pipe_connections then
+                local pipe_connections = entity.fluid_box.pipe_connections
+                for _, value in pairs(pipe_connections) do
+                    if value.max_underground_distance then
+                        value.max_underground_distance = space.amount * value.max_underground_distance
+                        if value.max_underground_distance > 255 then value.max_underground_distance = 255 end
+                    end
+                end
+            end
         end,
 
         ["pump"] = function(space, entity)
