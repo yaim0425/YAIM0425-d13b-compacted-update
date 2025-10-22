@@ -267,6 +267,10 @@ function This_MOD.reference_values()
         end,
 
         ["reactor"] = function(space, entity)
+            local energy = entity.energy_source
+            if energy.type == "burner" then
+                energy.effectivity = space.amount * (energy.effectivity or 1)
+            end
         end,
 
         ["solar-panel"] = function(space, entity)
