@@ -151,7 +151,6 @@ function This_MOD.reference_values()
         ["mining-drill"] = return_entity,
         ["pipe-to-ground"] = return_entity,
         ["pump"] = return_entity,
-        ["radar"] = return_entity,
         ["reactor"] = return_entity,
         ["solar-panel"] = return_entity,
         ["splitter"] = return_entity,
@@ -261,13 +260,6 @@ function This_MOD.reference_values()
         end,
 
         ["pump"] = function(space, entity)
-        end,
-
-        ["radar"] = function(space, entity)
-            if entity.max_distance_of_sector_revealed > 0 then
-                entity.max_distance_of_sector_revealed =
-                    space.amount + entity.max_distance_of_sector_revealed
-            end
         end,
 
         ["reactor"] = function(space, entity)
