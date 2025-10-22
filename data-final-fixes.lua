@@ -260,6 +260,9 @@ function This_MOD.reference_values()
         end,
 
         ["pump"] = function(space, entity)
+            if entity.pumping_speed then
+                entity.pumping_speed = space.amount * entity.pumping_speed
+            end
         end,
 
         ["reactor"] = function(space, entity)
