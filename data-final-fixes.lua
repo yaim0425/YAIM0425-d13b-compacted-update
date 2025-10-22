@@ -241,9 +241,21 @@ function This_MOD.reference_values()
         end,
 
         ["lane-splitter"] = function(space, entity)
+            --- Velocidad de la cintas
+            entity.speed = space.amount * entity.speed
+
+            --- Velocidad de la animación
+            local Fact = entity.speed / space.entity.speed
+            entity.animation_speed_coefficient = entity.animation_speed_coefficient / Fact
         end,
 
         ["loader-1x1"] = function(space, entity)
+            --- Velocidad de la cintas
+            entity.speed = space.amount * entity.speed
+
+            --- Velocidad de la animación
+            local Fact = entity.speed / space.entity.speed
+            entity.animation_speed_coefficient = entity.animation_speed_coefficient / Fact
         end,
 
         ["locomotive"] = function(space, entity)
@@ -295,6 +307,12 @@ function This_MOD.reference_values()
         end,
 
         ["splitter"] = function(space, entity)
+            --- Velocidad de la cintas
+            entity.speed = space.amount * entity.speed
+
+            --- Velocidad de la animación
+            local Fact = entity.speed / space.entity.speed
+            entity.animation_speed_coefficient = entity.animation_speed_coefficient / Fact
         end,
 
         ["storage-tank"] = function(space, entity)
@@ -302,9 +320,31 @@ function This_MOD.reference_values()
         end,
 
         ["transport-belt"] = function(space, entity)
+            --- Velocidad de la cintas
+            entity.speed = space.amount * entity.speed
+
+            --- Velocidad de la animación
+            local Fact = entity.speed / space.entity.speed
+            entity.animation_speed_coefficient = entity.animation_speed_coefficient / Fact
+
+            --- Entidad para el remplazo
+            if not entity.related_underground_belt then return end
+            entity.related_underground_belt = entity.next_upgrade
         end,
 
         ["underground-belt"] = function(space, entity)
+            --- Velocidad de la cintas
+            entity.speed = space.amount * entity.speed
+
+            --- Velocidad de la animación
+            local Fact = entity.speed / space.entity.speed
+            entity.animation_speed_coefficient = entity.animation_speed_coefficient / Fact
+
+            --- Distancia
+            if not entity.max_distance then return end
+            if entity.max_distance == 0 then return end
+            entity.max_distance = entity.max_distance + 2 * (space.amount - 1)
+            if entity.max_distance > 255 then entity.max_distance = 255 end
         end,
 
         ["wall"] = function(space, entity)
