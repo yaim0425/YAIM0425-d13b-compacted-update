@@ -255,6 +255,11 @@ function This_MOD.reference_values()
         end,
 
         ["mining-drill"] = function(space, entity)
+            local energy = entity.energy_source
+            if energy.type == "burner" then
+                energy.effectivity = space.amount * (energy.effectivity or 1)
+            end
+            entity.mining_speed = space.amount * entity.mining_speed
         end,
 
         ["pipe-to-ground"] = function(space, entity)
