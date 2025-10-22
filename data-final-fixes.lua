@@ -264,6 +264,10 @@ function This_MOD.reference_values()
         end,
 
         ["radar"] = function(space, entity)
+            if entity.max_distance_of_sector_revealed > 0 then
+                entity.max_distance_of_sector_revealed =
+                    space.amount + entity.max_distance_of_sector_revealed
+            end
         end,
 
         ["reactor"] = function(space, entity)
