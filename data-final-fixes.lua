@@ -327,9 +327,21 @@ function This_MOD.reference_values()
             local Fact = entity.speed / space.entity.speed
             entity.animation_speed_coefficient = entity.animation_speed_coefficient / Fact
 
-            --- Entidad para el remplazo
+            --- Cinta subterranea a usar
             if not entity.related_underground_belt then return end
-            entity.related_underground_belt = entity.next_upgrade
+            local Item = GMOD.items[entity.related_underground_belt]
+            entity.related_underground_belt =
+                GMOD.name .. (
+                    GMOD.get_id_and_name(entity.name) or
+                    { ids = "-" .. This_MOD.id .. "-" }
+                ).ids .. (
+                    d12b.setting.stack_size and
+                    Item.stack_size .. "x" .. d12b.setting.amount or
+                    space.amount
+                ) .. "u-" .. (
+                    GMOD.get_id_and_name(entity.related_underground_belt) or
+                    { name = entity.related_underground_belt }
+                ).name
         end,
 
         ["underground-belt"] = function(space, entity)
