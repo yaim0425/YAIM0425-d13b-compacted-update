@@ -242,7 +242,7 @@ function This_MOD.reference_values()
 
         ["lane-splitter"] = function(space, entity)
             --- Velocidad de la cintas
-            entity.speed = space.belt * entity.speed
+            entity.speed = (space.belt or space.amount) * entity.speed
 
             --- Velocidad de la animación
             local Fact = entity.speed / space.entity.speed
@@ -251,7 +251,7 @@ function This_MOD.reference_values()
 
         ["loader-1x1"] = function(space, entity)
             --- Velocidad de la cintas
-            entity.speed = space.belt * entity.speed
+            entity.speed = (space.belt or space.amount) * entity.speed
 
             --- Velocidad de la animación
             local Fact = entity.speed / space.entity.speed
@@ -346,7 +346,7 @@ function This_MOD.reference_values()
 
         ["underground-belt"] = function(space, entity)
             --- Velocidad de la cintas
-            entity.speed = space.belt * entity.speed
+            entity.speed = (space.belt or space.amount) * entity.speed
 
             --- Velocidad de la animación
             local Fact = entity.speed / space.entity.speed
@@ -355,7 +355,7 @@ function This_MOD.reference_values()
             --- Distancia
             if not entity.max_distance then return end
             if entity.max_distance == 0 then return end
-            entity.max_distance = entity.max_distance + 2 * (space.belt - 1)
+            entity.max_distance = entity.max_distance + 2 * ((space.belt or space.amount) - 1)
             if entity.max_distance > 255 then entity.max_distance = 255 end
         end,
 
@@ -499,7 +499,6 @@ function This_MOD.get_elements()
         Space.name = Name
 
         Space.item = Item
-        Space.belt = Amount
         Space.amount = Amount
         Space.item_do = Item_do
 
