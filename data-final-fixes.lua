@@ -242,7 +242,7 @@ function This_MOD.reference_values()
 
         ["lane-splitter"] = function(space, entity)
             --- Velocidad de la cintas
-            entity.speed = space.amount * entity.speed
+            entity.speed = space.belt * entity.speed
 
             --- Velocidad de la animación
             local Fact = entity.speed / space.entity.speed
@@ -251,7 +251,7 @@ function This_MOD.reference_values()
 
         ["loader-1x1"] = function(space, entity)
             --- Velocidad de la cintas
-            entity.speed = space.amount * entity.speed
+            entity.speed = space.belt * entity.speed
 
             --- Velocidad de la animación
             local Fact = entity.speed / space.entity.speed
@@ -346,7 +346,7 @@ function This_MOD.reference_values()
 
         ["underground-belt"] = function(space, entity)
             --- Velocidad de la cintas
-            entity.speed = space.amount * entity.speed
+            entity.speed = space.belt * entity.speed
 
             --- Velocidad de la animación
             local Fact = entity.speed / space.entity.speed
@@ -355,7 +355,7 @@ function This_MOD.reference_values()
             --- Distancia
             if not entity.max_distance then return end
             if entity.max_distance == 0 then return end
-            entity.max_distance = entity.max_distance + 2 * (space.amount - 1)
+            entity.max_distance = entity.max_distance + 2 * (space.belt - 1)
             if entity.max_distance > 255 then entity.max_distance = 255 end
         end,
 
@@ -499,16 +499,9 @@ function This_MOD.get_elements()
         Space.name = Name
 
         Space.item = Item
+        Space.belt = Amount
         Space.amount = Amount
         Space.item_do = Item_do
-
-        Space.prefix =
-            GMOD.name .. That_MOD.ids ..
-            This_MOD.id .. "-" .. (
-                d12b.setting.stack_size and
-                Item.stack_size .. "x" .. d12b.setting.amount or
-                Amount
-            ) .. "u-"
 
         Space.recipe_do = recipe
         Space.recipe_undo = recipe.name:gsub(
@@ -541,6 +534,32 @@ function This_MOD.get_elements()
         else
             return
         end
+
+        --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+        local Belts = {
+            ["underground-belt"] = true,
+            ["lane-splitter"] = true,
+            ["loader-1x1"] = true
+        }
+
+        repeat
+            if not Belts[Space.entity.type] then break end
+            if not Space.entity then break end
+
+            local Find = Space.entity.type:gsub("%-", "%%-")
+            local Belt = Space.item.name:gsub(Find, "transport-belt")
+            Belt = GMOD.items[Belt]
+            if not Belt then break end
+
+            Space.belt = d12b.setting.amount
+            if d12b.setting.stack_size then
+                Space.belt = Space.belt * Belt.stack_size
+                if Space.belt > 65000 then
+                    Space.belt = 65000
+                end
+            end
+        until true
 
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
@@ -710,11 +729,22 @@ function This_MOD.create_entity(space)
         --- Validación
         if not entity then return end
 
+        --- Cargar el objeto de referencia
+        local Item = GMOD.items[entity]
+
         --- Nombre despues del aplicar el MOD
-        local Name = space.prefix .. (
-            GMOD.get_id_and_name(entity) or
-            { name = entity }
-        ).name
+        local Name =
+            GMOD.name .. (
+                GMOD.get_id_and_name(space.name) or
+                { ids = "-" }
+            ).ids .. (
+                d12b.setting.stack_size and
+                Item.stack_size .. "x" .. d12b.setting.amount or
+                space.amount
+            ) .. "u-" .. (
+                GMOD.get_id_and_name(entity) or
+                { name = entity }
+            ).name
 
         --- La entidad ya existe
         if GMOD.entities[Name] then return Name end
