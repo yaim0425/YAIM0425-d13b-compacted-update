@@ -277,7 +277,6 @@ function This_MOD.reference_values()
         end,
 
         ["generator"] = function(space, entity)
-            GMOD.var_dump(entity)
             entity.effectivity = space.amount * (entity.effectivity or 1)
         end,
 
