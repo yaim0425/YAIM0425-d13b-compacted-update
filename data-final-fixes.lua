@@ -129,65 +129,6 @@ function This_MOD.reference_values()
     local function return_entity(space) return space.entity end
     local function return_equipment(space) return space.equipment end
 
-    --- Validar por tipo
-    This_MOD.validate_to_type = {
-        --- Entities
-        ["assembling-machine"] = return_entity,
-        ["artillery-turret"] = return_entity,
-        ["artillery-wagon"] = return_entity,
-        ["beacon"] = return_entity,
-        ["boiler"] = return_entity,
-        ["cargo-wagon"] = return_entity,
-        ["construction-robot"] = return_entity,
-        ["electric-turret"] = return_entity,
-        ["fluid-wagon"] = return_entity,
-        ["furnace"] = return_entity,
-        ["gate"] = return_entity,
-        ["generator"] = return_entity,
-        ["inserter"] = return_entity,
-        ["lab"] = return_entity,
-        ["lane-splitter"] = return_entity,
-        ["loader-1x1"] = return_entity,
-        ["locomotive"] = return_entity,
-        ["logistic-robot"] = return_entity,
-        ["mining-drill"] = return_entity,
-        ["pipe-to-ground"] = return_entity,
-        ["pump"] = return_entity,
-        ["reactor"] = return_entity,
-        ["solar-panel"] = return_entity,
-        ["splitter"] = return_entity,
-        ["storage-tank"] = return_entity,
-        ["transport-belt"] = return_entity,
-        ["underground-belt"] = return_entity,
-        ["wall"] = return_entity,
-
-        ["accumulator"] = function(space)
-            if not space.entity.energy_source then return end
-            if not space.entity.energy_source.output_flow_limit then return end
-            local Energy = space.entity.energy_source.output_flow_limit
-            Energy = GMOD.number_unit(Energy)
-            if not Energy then return end
-            return space.entity
-        end,
-
-        --- Tile
-        ["tile"] = function(space) return space.title end,
-
-        --- Items
-        ["ammo"] = return_item,
-        ["module"] = return_item,
-        ["repair-tool"] = return_item,
-
-        --- Equipment
-        ["active-defense-equipment"] = return_equipment,
-        ["battery-equipment"] = return_equipment,
-        ["roboport-equipment"] = return_equipment,
-        ["generator-equipment"] = return_equipment,
-        ["solar-panel-equipment"] = return_equipment,
-        ["energy-shield-equipment"] = return_equipment,
-        ["movement-bonus-equipment"] = return_equipment,
-    }
-
     --- Efectos por tipo
     This_MOD.effect_to_type = {
         --- Entities
@@ -560,10 +501,16 @@ function This_MOD.get_elements()
             Space.entity = GMOD.entities[Item.place_result]
             if not Space.entity then return end
             if This_MOD.ignore_to_name[Space.entity.name] then return end
-            local Validate = This_MOD.validate_to_type[Space.entity.type]
-            if not Validate then return end
-            Space.entity = Validate(Space)
-            if not Space.entity then return end
+
+            if Space.entity.type == "accumulator" then
+                if not Space.entity.energy_source then return end
+                if not Space.entity.energy_source.output_flow_limit then return end
+                local Energy = Space.entity.energy_source.output_flow_limit
+                Energy = GMOD.number_unit(Energy)
+                if not Energy then return end
+            else
+                if not This_MOD.effect_to_type[Space.entity.type] then return end
+            end
 
             Space.localised_name = Space.entity.localised_name
             Space.localised_description = Space.entity.localised_description
