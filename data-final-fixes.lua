@@ -241,6 +241,7 @@ function This_MOD.reference_values()
         end,
 
         ["gate"] = function(space, entity)
+            entity.max_health = space.amount * entity.max_health
         end,
 
         ["generator"] = function(space, entity)
@@ -391,6 +392,7 @@ function This_MOD.reference_values()
         end,
 
         ["wall"] = function(space, entity)
+            entity.max_health = space.amount * entity.max_health
         end,
 
         --- Items
