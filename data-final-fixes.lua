@@ -124,9 +124,6 @@ function This_MOD.reference_values()
         ["shield-projector"] = true
     }
 
-    --- Efectos a duplicar
-    This_MOD.finds = { "beam", "projectile" }
-
     --- Efectos por tipo
     This_MOD.effect_to_type = {
         --- Entities
@@ -173,17 +170,9 @@ function This_MOD.reference_values()
                 energy.effectivity = space.amount * (energy.effectivity or 1)
             end
 
-            --- Para los que usan calor
-            if energy.type == "heat" then
-                energy.min_working_temperature = energy.min_working_temperature / space.amount
-                local fluid = data.raw.fluid[entity.output_fluid_box.filter]
-                if energy.min_working_temperature < fluid.default_temperature then
-                    energy.min_working_temperature = fluid.default_temperature
-                end
-            end
-
-            --- Temperatura del vapor saliente
-            entity.target_temperature = space.amount * entity.target_temperature
+            --- Velocidad de calentamiento
+            local Value, Unit = GMOD.number_unit(entity.energy_consumption)
+            entity.energy_consumption = (space.amount * Value) .. Unit
         end,
 
         ["cargo-wagon"] = function(space, entity)
@@ -217,7 +206,10 @@ function This_MOD.reference_values()
 
             --- Daño indirecto
             local Action = entity.attack_parameters.ammo_type.action
-            for _, type in pairs(This_MOD.finds) do
+            for _, type in pairs({
+                "beam",
+                "projectile"
+            }) do
                 for _, Table in pairs(
                     GMOD.get_tables(Action, "type", type) or {}
                 ) do
