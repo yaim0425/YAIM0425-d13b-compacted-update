@@ -509,7 +509,7 @@ function This_MOD.reference_values()
 
         ["module"] = function(space, item)
             for key, _ in pairs(item.effect) do
-                if key ~= "consumption" or (key == "consumption" and item.effect[key] < 0) then
+                if key ~= "pollution" or (key == "pollution" and item.effect[key] < 0) then
                     item.effect[key] = space.amount * item.effect[key]
                 end
                 if item.effect[key] > 327 then item.effect[key] = 327 end
@@ -1020,3 +1020,4 @@ end
 This_MOD.start()
 
 ---------------------------------------------------------------------------
+ERROR()
