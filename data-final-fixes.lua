@@ -465,6 +465,7 @@ function This_MOD.reference_values()
         end,
 
         ["energy-shield-equipment"] = function(space, equipment)
+            equipment.max_shield_value = space.amount * equipment.max_shield_value
         end,
 
         ["movement-bonus-equipment"] = function(space, equipment)
