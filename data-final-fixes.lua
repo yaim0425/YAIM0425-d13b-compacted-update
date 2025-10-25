@@ -425,21 +425,101 @@ function This_MOD.reference_values()
 
         --- Items
         ["ammo"] = function(space, item)
-        end,
+            --- Actualizar las propiedades
+            if item.magazine_size then
+                item.magazine_size = space.amount * item.magazine_size
+            end
 
-        ["module"] = function(space, item)
-            for key, _ in pairs(item.effect) do
-                if key ~= "consumption" or (key == "consumption" and item.effect[key] < 0) then
-                    item.effect[key] = space.amount * item.effect[key]
+            --- Actualizar el daño directo en el objeto
+            for _, element in pairs(
+                GMOD.get_tables(item.ammo_type, "type", "damage") or {}
+            ) do
+                element.damage.amount = space.amount * element.damage.amount
+            end
+
+            local function duplicate(effect)
+                if not effect then return end
+
+                --- Duplicar el efecto
+                effect = GMOD.copy(effect)
+
+                --- Actualizar el nombre
+                local That_MOD =
+                    GMOD.get_id_and_name(effect.name) or
+                    { ids = "-", name = effect.name }
+
+                effect.name =
+                    GMOD.name .. That_MOD.ids ..
+                    This_MOD.id .. "-" ..
+                    That_MOD.name .. "-" ..
+                    space.amount .. "x"
+
+                --- Verificar si ya existe
+                if data.raw[effect.type][effect.name] then
+                    return effect.name
                 end
-                if item.effect[key] > 327 then item.effect[key] = 327 end
-                if item.effect[key] < -327 then item.effect[key] = -327 end
+
+                --- Aumentar el daño
+                for _, element in pairs(
+                    GMOD.get_tables(effect, "damage") or {}
+                ) do
+                    if element.damage.amount then
+                        element.damage.amount = space.amount * element.damage.amount
+                    end
+                end
+
+                --- Crear y devolver el effecto
+                GMOD.extend(effect)
+                return effect.name
+            end
+
+            --- Bucar los daños indirectos
+            for _, find in pairs({
+                "damage",
+                "stream",
+                "artillery",
+                "projectile"
+            }) do
+                for _, effect in pairs(
+                    GMOD.get_tables(item.ammo_type, "type", find) or {}
+                ) do
+                    --- Duplicar el projectile
+                    repeat
+                        if effect.type ~= "projectile" then break end
+                        if GMOD.has_id(effect.projectile, This_MOD.id) then break end
+                        effect.projectile = duplicate(data.raw[effect.type][effect.projectile])
+                    until true
+
+                    --- Duplicar el artillery-projectile
+                    repeat
+                        if effect.type ~= "artillery" then break end
+                        if GMOD.has_id(effect.projectile, This_MOD.id) then break end
+                        effect.projectile = duplicate(data.raw["artillery-projectile"][effect.projectile])
+                    until true
+
+                    --- Duplicar el stream
+                    repeat
+                        if effect.type ~= "stream" then break end
+                        if GMOD.has_id(effect.stream, This_MOD.id) then break end
+                        effect.stream = duplicate(data.raw[effect.type][effect.stream])
+                    until true
+                end
             end
         end,
 
-        ["repair-tool"] = function(space, item)
-            item.speed = space.amount * item.speed
-            item.durability = space.amount * item.durability
+        ["module-"] = function(space, item)
+            -- for key, _ in pairs(item.effect) do
+            --     if key ~= "consumption" or (key == "consumption" and item.effect[key] < 0) then
+            --         item.effect[key] = space.amount * item.effect[key]
+            --     end
+            --     if item.effect[key] > 327 then item.effect[key] = 327 end
+            --     if item.effect[key] < -327 then item.effect[key] = -327 end
+            -- end
+        end,
+
+        ["repair-tool-"] = function(space, item)
+            -- item.speed = space.amount * item.speed
+            -- item.durability = space.amount * item.durability
         end,
 
         --- Tile
@@ -602,6 +682,9 @@ function This_MOD.get_elements()
         elseif Item.place_as_equipment_result then
             -- Space.equipment = GMOD.equipments[Item.place_as_equipment_result]
             return
+        elseif This_MOD.effect_to_type[Item.type] then
+            Space.localised_name = Item.localised_name
+            Space.localised_description = Item.localised_description
         else
             return
         end
@@ -615,8 +698,8 @@ function This_MOD.get_elements()
         }
 
         repeat
-            if not Belts[Space.entity.type] then break end
             if not Space.entity then break end
+            if not Belts[Space.entity.type] then break end
 
             local Find = Space.entity.type:gsub("%-", "%%-")
             local Belt = Space.item.name:gsub(Find, "transport-belt")
@@ -703,9 +786,6 @@ function This_MOD.create_item(space)
     Item.localised_name = GMOD.copy(space.localised_name)
     Item.localised_description = GMOD.copy(space.localised_description)
 
-    --- Entidad a crear
-    Item.place_result = space.name
-
     --- Agregar indicador del MOD
     Item.icons = GMOD.copy(space.item_do.icons)
     local Icon = GMOD.get_tables(Item.icons, "icon", d12b.indicator.icon)[1]
@@ -714,6 +794,24 @@ function This_MOD.create_item(space)
     --- Actualizar subgroup y order
     Item.subgroup = space.item_do.subgroup
     Item.order = space.item_do.order
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    ---- Modificar los objetos
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    if Item.place_result then
+        Item.place_result = space.name
+    end
+
+    if This_MOD.effect_to_type[Item.type] then
+        This_MOD.effect_to_type[Item.type](space, Item)
+    end
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
