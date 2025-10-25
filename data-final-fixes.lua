@@ -517,9 +517,9 @@ function This_MOD.reference_values()
             end
         end,
 
-        ["repair-tool-"] = function(space, item)
-            -- item.speed = space.amount * item.speed
-            -- item.durability = space.amount * item.durability
+        ["repair-tool"] = function(space, item)
+            item.speed = space.amount * item.speed
+            item.durability = space.amount * item.durability
         end,
 
         --- Tile
