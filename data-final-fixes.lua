@@ -244,6 +244,11 @@ function This_MOD.reference_values()
         end,
 
         ["generator"] = function(space, entity)
+            --- Temperatura maxima con la que puede funcionar
+            entity.maximum_temperature = space.amount * entity.maximum_temperature
+
+            --- Disminuir la catidad a usar
+            entity.effectivity = space.amount * (entity.effectivity or 1)
         end,
 
         ["inserter"] = function(space, entity)
