@@ -250,6 +250,7 @@ function This_MOD.reference_values()
         end,
 
         ["lab"] = function(space, entity)
+            entity.researching_speed = space.amount * (entity.researching_speed or 1)
         end,
 
         ["lane-splitter"] = function(space, entity)
