@@ -468,6 +468,8 @@ function This_MOD.reference_values()
         end,
 
         ["battery-equipment"] = function(space, equipment)
+            local Value, Unit = GMOD.number_unit(equipment.energy_source.buffer_capacity)
+            equipment.energy_source.buffer_capacity = (space.amount * Value) .. Unit
         end,
 
         ["roboport-equipment"] = function(space, equipment)
