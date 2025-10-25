@@ -133,6 +133,7 @@ function This_MOD.reference_values()
     This_MOD.validate_to_type = {
         --- Entities
         ["assembling-machine"] = return_entity,
+        ["artillery-wagon"] = return_entity,
         ["beacon"] = return_entity,
         ["boiler"] = return_entity,
         ["cargo-wagon"] = return_entity,
@@ -205,6 +206,14 @@ function This_MOD.reference_values()
         ["assembling-machine"] = function(space, entity)
         end,
 
+        ["artillery-wagon"] = function(space, entity)
+            entity.max_speed = space.amount * entity.max_speed
+
+            if entity.turret_rotation_speed then
+                entity.turret_rotation_speed = space.amount * entity.turret_rotation_speed
+            end
+        end,
+
         ["beacon"] = function(space, entity)
         end,
 
@@ -212,6 +221,14 @@ function This_MOD.reference_values()
         end,
 
         ["cargo-wagon"] = function(space, entity)
+            entity.max_speed = space.amount * entity.max_speed
+
+            if entity.inventory_size then
+                entity.inventory_size = space.amount * entity.inventory_size
+                if entity.inventory_size > 65535 then
+                    entity.inventory_size = 65535
+                end
+            end
         end,
 
         ["construction-robot"] = function(space, entity)
@@ -223,6 +240,11 @@ function This_MOD.reference_values()
         end,
 
         ["fluid-wagon"] = function(space, entity)
+            entity.max_speed = space.amount * entity.max_speed
+
+            if entity.capacity then
+                entity.capacity = space.amount * entity.capacity
+            end
         end,
 
         ["furnace"] = function(space, entity)
@@ -259,6 +281,17 @@ function This_MOD.reference_values()
         end,
 
         ["locomotive"] = function(space, entity)
+            entity.max_speed = space.amount * entity.max_speed
+
+            local energy = entity.energy_source
+            if energy and energy.type == "burner" then
+                energy.effectivity = space.amount * (energy.effectivity or 1)
+            end
+
+            if entity.max_power then
+                local Value, Unit = GMOD.number_unit(entity.max_power)
+                entity.max_power = (space.amount * Value) .. Unit
+            end
         end,
 
         ["logistic-robot"] = function(space, entity)
