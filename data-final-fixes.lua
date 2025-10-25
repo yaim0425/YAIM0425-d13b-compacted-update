@@ -124,10 +124,8 @@ function This_MOD.reference_values()
         ["shield-projector"] = true
     }
 
-    --- Funciones basicas
-    local function return_item(space) return space.item end
-    local function return_entity(space) return space.entity end
-    local function return_equipment(space) return space.equipment end
+    --- Efectos a duplicar
+    This_MOD.finds = { "beam", "projectile" }
 
     --- Efectos por tipo
     This_MOD.effect_to_type = {
@@ -185,6 +183,60 @@ function This_MOD.reference_values()
         end,
 
         ["electric-turret"] = function(space, entity)
+            --- Velocidad de respues
+            entity.rotation_speed = space.amount * entity.rotation_speed
+            entity.preparing_speed = space.amount * entity.preparing_speed
+
+            --- Daño directo
+            local damages = GMOD.get_tables(entity.attack_parameters, "type", "damage")
+            for _, element in pairs(damages or {}) do
+                if element.damages.amount then
+                    element.damage.amount = space.amount * element.damage.amount
+                end
+            end
+
+            --- Daño indirecto
+            local Action = entity.attack_parameters.ammo_type.action
+            for _, type in pairs(This_MOD.finds) do
+                for _, Table in pairs(
+                    GMOD.get_tables(Action, "type", type) or {}
+                ) do
+                    repeat
+                        --- Validación
+                        if GMOD.has_id(Table[type], This_MOD.id) then break end
+                        local Effecto = data.raw[type][Table[type]]
+                        if not Effecto then break end
+
+                        --- Duplicar el efecto
+                        Effecto = GMOD.copy(Effecto)
+
+                        --- Actualizar el nombre
+                        local That_MOD =
+                            GMOD.get_id_and_name(Effecto.name) or
+                            { ids = "-", name = Effecto.name }
+
+                        Effecto.name =
+                            GMOD.name .. That_MOD.ids ..
+                            This_MOD.id .. "-" ..
+                            That_MOD.name .. "-" ..
+                            space.amount .. "x"
+
+                        Table[type] = Effecto.name
+
+                        --- Aumentar el daño
+                        for _, element in pairs(
+                            GMOD.get_tables(Effecto, "type", "damage") or {}
+                        ) do
+                            if element.damage.amount then
+                                element.damage.amount = space.amount * element.damage.amount
+                            end
+                        end
+
+                        --- Crear y devolver el effecto
+                        GMOD.extend(Effecto)
+                    until true
+                end
+            end
         end,
 
         ["fluid-wagon"] = function(space, entity)
