@@ -146,18 +146,8 @@ function This_MOD.reference_values()
         ["assembling-machine"] = function(space, entity)
         end,
 
-        ["artillery-turret"] = function(space, entity)
-            if entity.turret_rotation_speed then
-                entity.turret_rotation_speed = space.amount * entity.turret_rotation_speed
-            end
-        end,
-
         ["artillery-wagon"] = function(space, entity)
             entity.max_speed = space.amount * entity.max_speed
-
-            if entity.turret_rotation_speed then
-                entity.turret_rotation_speed = space.amount * entity.turret_rotation_speed
-            end
         end,
 
         ["beacon"] = function(space, entity)
