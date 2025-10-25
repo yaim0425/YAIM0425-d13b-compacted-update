@@ -247,6 +247,8 @@ function This_MOD.reference_values()
         end,
 
         ["inserter"] = function(space, entity)
+            entity.extension_speed = space.amount * entity.extension_speed
+            entity.rotation_speed  = space.amount * entity.rotation_speed
         end,
 
         ["lab"] = function(space, entity)
