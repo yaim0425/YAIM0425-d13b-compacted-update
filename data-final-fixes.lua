@@ -238,6 +238,16 @@ function This_MOD.reference_values()
         end,
 
         ["furnace"] = function(space, entity)
+            --- Renombrar
+            local energy = entity.energy_source
+
+            --- Usar menos combustible
+            if energy.type == "burner" then
+                energy.effectivity = space.amount * (energy.effectivity or 1)
+            end
+
+            --- Aumnetar la velocidad de fabricación
+            entity.crafting_speed = space.amount * entity.crafting_speed
         end,
 
         ["gate"] = function(space, entity)
