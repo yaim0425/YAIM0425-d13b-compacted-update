@@ -144,6 +144,16 @@ function This_MOD.reference_values()
         end,
 
         ["assembling-machine"] = function(space, entity)
+            --- Renombrar
+            local Table = entity.energy_source
+
+            --- Usar menos combustible
+            if Table.type == "burner" then
+                Table.effectivity = space.amount * (Table.effectivity or 1)
+            end
+
+            --- Aumnetar la velocidad de fabricación
+            entity.crafting_speed = space.amount * entity.crafting_speed
         end,
 
         ["artillery-wagon"] = function(space, entity)
