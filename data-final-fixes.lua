@@ -151,6 +151,7 @@ function This_MOD.reference_values()
         end,
 
         ["beacon"] = function(space, entity)
+            entity.distribution_effectivity = space.amount * entity.distribution_effectivity
         end,
 
         ["boiler"] = function(space, entity)
