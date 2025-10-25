@@ -133,6 +133,7 @@ function This_MOD.reference_values()
     This_MOD.validate_to_type = {
         --- Entities
         ["assembling-machine"] = return_entity,
+        ["artillery-turret"] = return_entity,
         ["artillery-wagon"] = return_entity,
         ["beacon"] = return_entity,
         ["boiler"] = return_entity,
@@ -204,6 +205,12 @@ function This_MOD.reference_values()
         end,
 
         ["assembling-machine"] = function(space, entity)
+        end,
+
+        ["artillery-turret"] = function(space, entity)
+            if entity.turret_rotation_speed then
+                entity.turret_rotation_speed = space.amount * entity.turret_rotation_speed
+            end
         end,
 
         ["artillery-wagon"] = function(space, entity)
