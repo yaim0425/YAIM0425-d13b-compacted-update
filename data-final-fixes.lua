@@ -154,6 +154,25 @@ function This_MOD.reference_values()
         end,
 
         ["boiler"] = function(space, entity)
+            --- Renombrar
+            local energy = entity.energy_source
+
+            --- Para los que usan combustible
+            if energy.type == "burner" then
+                energy.effectivity = space.amount * (energy.effectivity or 1)
+            end
+
+            --- Para los que usan calor
+            if energy.type == "heat" then
+                energy.min_working_temperature = energy.min_working_temperature / space.amount
+                local fluid = data.raw.fluid[entity.output_fluid_box.filter]
+                if energy.min_working_temperature < fluid.default_temperature then
+                    energy.min_working_temperature = fluid.default_temperature
+                end
+            end
+
+            --- Temperatura del vapor saliente
+            entity.target_temperature = space.amount * entity.target_temperature
         end,
 
         ["cargo-wagon"] = function(space, entity)
