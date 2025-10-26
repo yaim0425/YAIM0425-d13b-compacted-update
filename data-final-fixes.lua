@@ -46,6 +46,7 @@ function This_MOD.start()
             --- Crear los elementos
             This_MOD.create_item(space)
             This_MOD.create_tile(space)
+            This_MOD.create_equipment(space)
             This_MOD.create_entity(space)
             This_MOD.create_recipe(space)
             This_MOD.create_tech(space)
@@ -560,6 +561,64 @@ function This_MOD.reference_values()
 
         --- Equipment
         ["active-defense-equipment"] = function(space, equipment)
+            local Action = equipment.attack_parameters.ammo_type.action
+            for _, type in pairs({
+                "beam",
+                "projectile"
+            }) do
+                for _, Table in pairs(
+                    GMOD.get_tables(Action, "type", type) or {}
+                ) do
+                    repeat
+                        --- Validación
+                        if GMOD.has_id(Table[type], This_MOD.id) then break end
+                        local Effecto = data.raw[type][Table[type]]
+                        if not Effecto then break end
+
+                        --- Duplicar el efecto
+                        Effecto = GMOD.copy(Effecto)
+
+                        --- Actualizar el nombre
+                        local That_MOD =
+                            GMOD.get_id_and_name(Effecto.name) or
+                            { ids = "-", name = Effecto.name }
+
+                        Effecto.name =
+                            GMOD.name .. That_MOD.ids ..
+                            This_MOD.id .. "-" ..
+                            That_MOD.name .. "-" ..
+                            space.amount .. "x"
+
+                        Table[type] = Effecto.name
+
+                        --- Aumentar el daño
+                        for _, element in pairs(
+                            GMOD.get_tables(Effecto, "type", "damage") or {}
+                        ) do
+                            if element.damage.amount then
+                                element.damage.amount = space.amount * element.damage.amount
+                            end
+                        end
+
+                        --- Crear y devolver el effecto
+                        GMOD.extend(Effecto)
+                    until true
+                end
+            end
+
+
+            if true then return end
+
+            --- Buscar los efectos
+            local effects = {}
+            GPrefix.get_tables(equipment.attack_parameters.ammo_type.action, "type", "beam", effects)
+
+            --- Cambiar el efecto y el daño del mismo
+            for _, effect in pairs(effects.beam) do
+                local name = ThisMOD.Prefix .. GPrefix.delete_prefix(effect.beam) .. "-x" .. ThisMOD.increment
+                if not data.raw.beam[name] then ThisMOD.duplicate(data.raw.beam[effect.beam]) end
+                effect.beam = name
+            end
         end,
 
         ["battery-equipment"] = function(space, equipment)
@@ -577,17 +636,13 @@ function This_MOD.reference_values()
         end,
 
         ["solar-panel-equipment"] = function(space, equipment)
-            local Value, Unit = GMOD.number_unit(equipment.production)
-            equipment.production = (space.amount * Value) .. Unit
+            local Value, Unit = GMOD.number_unit(equipment.power)
+            equipment.power = (space.amount * Value) .. Unit
         end,
 
         ["energy-shield-equipment"] = function(space, equipment)
             equipment.max_shield_value = space.amount * equipment.max_shield_value
-        end,
-
-        ["movement-bonus-equipment"] = function(space, equipment)
-            equipment.movement_bonus = space.amount * equipment.movement_bonus
-        end,
+        end
     }
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -687,11 +742,7 @@ function This_MOD.get_elements()
         --- Validar el elemento a afectar
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
-        local Not_propiety = false
-        if Item.place_as_tile then
-            Space.tiles = GMOD.tiles[Item.name]
-            if not Space.tiles then return end
-        elseif Item.place_result then
+        if Item.place_result then
             Space.entity = GMOD.entities[Item.place_result]
             if not Space.entity then return end
             if This_MOD.ignore_to_name[Space.entity.name] then return end
@@ -705,24 +756,33 @@ function This_MOD.get_elements()
             else
                 if not This_MOD.effect_to_type[Space.entity.type] then return end
             end
-        elseif Item.place_as_equipment_result then
-            -- Space.equipment = GMOD.equipments[Item.place_as_equipment_result]
+        end
+
+        if Item.place_as_tile then
+            Space.tiles = GMOD.tiles[Item.name]
+            if not Space.tiles then return end
+        end
+
+        if Item.place_as_equipment_result then
+            for _, equipment in pairs(GMOD.equipments) do
+                if Item.place_as_equipment_result == equipment.name then
+                    if This_MOD.effect_to_type[equipment.type] then
+                        Space.equipment = equipment
+                    end
+                end
+            end
+            if not Space.equipment then return end
+        end
+
+        --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+        repeat
+            if This_MOD.effect_to_type[Item.type] then break end
+            if Item.place_as_equipment_result then break end
+            if Item.place_as_tile then break end
+            if Item.place_result then break end
             return
-        else
-            Not_propiety = true
-        end
-
-        --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-
-        local Not_effect = false
-        if This_MOD.effect_to_type[Item.type] then
-        else
-            Not_effect = true
-        end
-
-        --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-
-        if Not_propiety and Not_effect then return end
+        until true
 
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
@@ -842,8 +902,14 @@ function This_MOD.create_item(space)
 
     if Item.place_result then
         Item.place_result = space.name
-    elseif Item.place_as_tile then
+    end
+
+    if Item.place_as_tile then
         Item.place_as_tile.result = space.name .. "-1"
+    end
+
+    if Item.place_as_equipment_result then
+        Item.place_as_equipment_result = space.name
     end
 
     if This_MOD.effect_to_type[Item.type] then
@@ -970,6 +1036,80 @@ function This_MOD.create_tile(space)
 
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
     end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+end
+
+function This_MOD.create_equipment(space)
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Validación
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    if not space.equipment then return end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Duplicar el elemento
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    local Equipment = GMOD.copy(space.equipment)
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Cambiar algunas propiedades
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    --- Nombre
+    Equipment.name = space.name
+
+    --- Apodo y descripción
+    Equipment.localised_name = GMOD.copy(space.localised_name)
+    Equipment.localised_description = GMOD.copy(space.localised_description)
+
+    --- Agregar indicador del MOD
+    Equipment.icons = GMOD.copy(space.item_do.icons)
+    local Icon = GMOD.get_tables(Equipment.icons, "icon", d12b.indicator.icon)[1]
+    Icon.icon = This_MOD.indicator.icon
+
+    --- Actualizar subgroup y order
+    Equipment.subgroup = space.item_do.subgroup
+    Equipment.order = space.item_do.order
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    ---- Modificar los equipment
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    if This_MOD.effect_to_type[Equipment.type] then
+        This_MOD.effect_to_type[Equipment.type](space, Equipment)
+    end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    ---- Crear el prototipo
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    GMOD.extend(Equipment)
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
