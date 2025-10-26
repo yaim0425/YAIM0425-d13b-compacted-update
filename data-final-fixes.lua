@@ -764,6 +764,7 @@ function This_MOD.get_elements()
 
         repeat
             if This_MOD.effect_to_type[Item.type] then break end
+            if Item.fuel_value then break end
             if Item.place_as_equipment_result then break end
             if Item.place_as_tile then break end
             if Item.place_result then break end
@@ -900,6 +901,20 @@ function This_MOD.create_item(space)
 
     if This_MOD.effect_to_type[Item.type] then
         This_MOD.effect_to_type[Item.type](space, Item)
+    end
+
+    if Item.fuel_value then
+        local Value, Unit = GMOD.number_unit(Item.fuel_value)
+        Item.fuel_value = Value * space.amount .. Unit
+
+        if Item.burnt_result then
+            for _, recipe in pairs(GMOD.recipes[Item.burnt_result]) do
+                if GMOD.has_id(recipe.name, d12b.category_undo) then
+                    Item.burnt_result = recipe.ingredients[1].name
+                    break
+                end
+            end
+        end
     end
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
