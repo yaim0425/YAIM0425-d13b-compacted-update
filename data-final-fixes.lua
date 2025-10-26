@@ -336,6 +336,17 @@ function This_MOD.reference_values()
             entity.mining_speed = space.amount * entity.mining_speed
         end,
 
+        ["offshore-pump"] = function(space, entity)
+            repeat
+                if not entity.fluid_box then break end
+                if not entity.fluid_box.volume then break end
+                entity.fluid_box.volume = space.amount * entity.fluid_box.volume
+            until true
+            if entity.pumping_speed then
+                entity.pumping_speed = space.amount * entity.pumping_speed
+            end
+        end,
+
         ["pipe-to-ground"] = function(space, entity)
             if not entity.fluid_box then return end
             if not entity.fluid_box.pipe_connections then return end
@@ -352,8 +363,14 @@ function This_MOD.reference_values()
         end,
 
         ["pump"] = function(space, entity)
-            if not entity.pumping_speed then return end
-            entity.pumping_speed = space.amount * entity.pumping_speed
+            repeat
+                if not entity.fluid_box then break end
+                if not entity.fluid_box.volume then break end
+                entity.fluid_box.volume = space.amount * entity.fluid_box.volume
+            until true
+            if entity.pumping_speed then
+                entity.pumping_speed = space.amount * entity.pumping_speed
+            end
         end,
 
         ["reactor"] = function(space, entity)
@@ -657,13 +674,23 @@ function This_MOD.get_elements()
 
         Space.tech = GMOD.get_technology({ Space.recipe_undo }, true)
 
+        Space.localised_name = Item.localised_name
+        Space.localised_description = Item.localised_description
+
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
+
+
+
+
+        --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+        --- Validar el elemento a afectar
+        --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+        local Not_propiety = false
         if Item.place_as_tile then
             Space.tiles = GMOD.tiles[Item.name]
             if not Space.tiles then return end
-            Space.localised_name = Space.item.localised_name
-            Space.localised_description = Space.item.localised_description
         elseif Item.place_result then
             Space.entity = GMOD.entities[Item.place_result]
             if not Space.entity then return end
@@ -678,18 +705,24 @@ function This_MOD.get_elements()
             else
                 if not This_MOD.effect_to_type[Space.entity.type] then return end
             end
-
-            Space.localised_name = Space.entity.localised_name
-            Space.localised_description = Space.entity.localised_description
         elseif Item.place_as_equipment_result then
             -- Space.equipment = GMOD.equipments[Item.place_as_equipment_result]
             return
-        elseif This_MOD.effect_to_type[Item.type] then
-            Space.localised_name = Item.localised_name
-            Space.localised_description = Item.localised_description
         else
-            return
+            Not_propiety = true
         end
+
+        --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+        local Not_effect = false
+        if This_MOD.effect_to_type[Item.type] then
+        else
+            Not_effect = true
+        end
+
+        --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+        if Not_propiety and Not_effect then return end
 
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
