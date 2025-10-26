@@ -45,6 +45,7 @@ function This_MOD.start()
 
             --- Crear los elementos
             This_MOD.create_item(space)
+            This_MOD.create_tile(space)
             This_MOD.create_entity(space)
             This_MOD.create_recipe(space)
             This_MOD.create_tech(space)
@@ -524,20 +525,19 @@ function This_MOD.reference_values()
 
         --- Tile
         ["tile"] = function(space, tile)
-            local i = space.amount - 1
-            local pollution = 0
-            local spores = 0
+            local Pollution = 0
+            local Spores = 0
 
-            if tile.absorptions_per_second then
-                pollution = tile.absorptions_per_second.pollution or 0.005
-                if mods["space-age"] then
-                    spores = tile.absorptions_per_second.spores or 0.005
-                end
+            tile.absorptions_per_second = tile.absorptions_per_second or {}
+            Pollution = tile.absorptions_per_second.pollution or 0.0000025
+            Pollution = Pollution ~= 0 and Pollution or 0.0000025
+            if mods["space-age"] then
+                Spores = tile.absorptions_per_second.spores or 0.0000025
             end
 
             tile.absorptions_per_second = {
-                spores = spores > 0 and spores * i or nil,
-                pollution = pollution * i,
+                spores = Spores > 0 and (Spores * (space.amount - 1)) or nil,
+                pollution = Pollution * (space.amount - 1),
             }
         end,
 
@@ -660,8 +660,10 @@ function This_MOD.get_elements()
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
         if Item.place_as_tile then
-            -- Space.title = GMOD.entities[Item.place_as_tile]
-            return
+            Space.tiles = GMOD.tiles[Item.name]
+            if not Space.tiles then return end
+            Space.localised_name = Space.item.localised_name
+            Space.localised_description = Space.item.localised_description
         elseif Item.place_result then
             Space.entity = GMOD.entities[Item.place_result]
             if not Space.entity then return end
@@ -807,6 +809,8 @@ function This_MOD.create_item(space)
 
     if Item.place_result then
         Item.place_result = space.name
+    elseif Item.place_as_tile then
+        Item.place_as_tile.result = space.name .. "-1"
     end
 
     if This_MOD.effect_to_type[Item.type] then
@@ -837,6 +841,102 @@ function This_MOD.create_item(space)
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
     GMOD.extend(Item)
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+end
+
+function This_MOD.create_tile(space)
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Validación
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    if not space.tiles then return end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Duplicar el elemento
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    for i, Tile in pairs(space.tiles) do
+        --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+        --- Duplicar el suelo
+        --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+        Tile = GMOD.copy(Tile)
+
+        --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+        --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+        --- Cambiar algunas propiedades
+        --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+        --- Nombre
+        Tile.name = space.name .. "-" .. i
+
+        --- Apodo y descripción
+        Tile.localised_name = GMOD.copy(space.localised_name)
+        Tile.localised_description = GMOD.copy(space.localised_description)
+
+        --- Agregar indicador del MOD
+        Tile.icons = GMOD.copy(GMOD.items[space.name].icons)
+
+        --- Objeto a minar
+        Tile.minable.results = { {
+            type = "item",
+            name = space.name,
+            amount = 1
+        } }
+
+        --- Siguiente tile
+        if Tile.next_direction then
+            local Next = i + 1
+            if Next > #space.tiles then
+                Next = 1
+            end
+            Tile.next_direction = space.name .. "-" .. Next
+        end
+
+        --- Actualizar subgroup y order
+        Tile.subgroup = space.item_do.subgroup
+        Tile.order = space.item_do.order
+
+        --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+        --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+        ---- Modificar los objetos
+        --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+        if This_MOD.effect_to_type[Tile.type] then
+            This_MOD.effect_to_type[Tile.type](space, Tile)
+        end
+
+        --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+        --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+        ---- Crear el prototipo
+        --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+        GMOD.extend(Tile)
+
+        --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    end
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
@@ -963,9 +1063,6 @@ function This_MOD.create_recipe(space)
     if not space.recipe_do then return end
     if not space.recipe_undo then return end
 
-    if data.raw.recipe[space.recipe_do] then return end
-    if data.raw.recipe[space.recipe_undo] then return end
-
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
 
@@ -1020,4 +1117,103 @@ end
 This_MOD.start()
 
 ---------------------------------------------------------------------------
-ERROR()
+
+if true then return end
+
+local function DeepCopy(value)
+    if type(value) ~= "table" then return value end
+    local Output = {}
+    for Key, Value in pairs(value) do
+        Output[Key] = DeepCopy(Value)
+    end
+    return Output
+end
+
+local function getSignal(signal)
+    return data.raw["virtual-signal"]["signal-" .. signal .. ""].icon
+end
+
+-- local x = {}
+-- for key, value in pairs({
+--     "concrete",
+--     "stone-brick",
+--     "hazard-concrete",
+--     "refined-concrete",
+--     "refined-hazard-concrete",
+--     "landfill"
+-- }) do
+--     local tile = data.raw.tile[data.raw.item[value].place_as_tile.result]
+--     x[value] = { tile.name, tile.next_direction }
+-- end
+-- GMOD.var_dump(x)
+
+local Target = {
+    ['concrete'] = {
+        [1] = 'concrete'
+    },
+    ['stone-brick'] = {
+        [1] = 'stone-path'
+    },
+    ['hazard-concrete'] = {
+        [1] = 'hazard-concrete-left',
+        [2] = 'hazard-concrete-right'
+    },
+    ['refined-concrete'] = {
+        [1] = 'refined-concrete'
+    },
+    ['refined-hazard-concrete'] = {
+        [1] = 'refined-hazard-concrete-left',
+        [2] = 'refined-hazard-concrete-right'
+    },
+    ['landfill'] = {
+        [1] = 'landfill'
+    }
+}
+
+for name_item, names_tiles in pairs(Target) do
+    local Item = DeepCopy(data.raw.item[name_item])
+    Item.name = Item.name .. "-1"
+    Item.place_as_tile.result = Item.name
+
+    Item.icons = {
+        { icon = getSignal("pink") },
+        {
+            icon = Item.icon,
+            icon_size = Item.icon_size
+        }
+    }
+
+    data:extend { Item }
+
+    for _, name_tile in pairs(names_tiles) do
+        local Tile = DeepCopy(data.raw.tile[name_tile])
+        Tile.name = Item.name
+        Tile.minable = {
+            mining_time = 0.1,
+            results = { {
+                type = "item",
+                name = Item.name,
+                amount = 1
+            } }
+        }
+        Tile.icons = DeepCopy(Item.icons)
+
+        local Pollution = 0
+        local Spores = 0
+        local Amount = 500
+
+        Tile.absorptions_per_second = Tile.absorptions_per_second or {}
+        Pollution = Tile.absorptions_per_second.pollution or 0.0000025
+        Pollution = Pollution ~= 0 and Pollution or 0.0000025
+        if mods["space-age"] then
+            Spores = Tile.absorptions_per_second.spores or 0.0000025
+        end
+
+        Tile.absorptions_per_second = {
+            spores = Spores > 0 and (Spores * (Amount - 1)) or nil,
+            pollution = Pollution * (Amount - 1),
+        }
+
+        data:extend { Tile }
+    end
+end
