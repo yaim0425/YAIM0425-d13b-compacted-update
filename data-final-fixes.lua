@@ -677,6 +677,8 @@ function This_MOD.get_elements()
         end
 
         --- Validar si ya fue procesado
+        if GMOD.has_id(Item_do.name, This_MOD.id) then return end
+
         local That_MOD =
             GMOD.get_id_and_name(Item_do.name) or
             { ids = "-", name = Item_do.name }
