@@ -605,20 +605,6 @@ function This_MOD.reference_values()
                     until true
                 end
             end
-
-
-            if true then return end
-
-            --- Buscar los efectos
-            local effects = {}
-            GPrefix.get_tables(equipment.attack_parameters.ammo_type.action, "type", "beam", effects)
-
-            --- Cambiar el efecto y el daño del mismo
-            for _, effect in pairs(effects.beam) do
-                local name = ThisMOD.Prefix .. GPrefix.delete_prefix(effect.beam) .. "-x" .. ThisMOD.increment
-                if not data.raw.beam[name] then ThisMOD.duplicate(data.raw.beam[effect.beam]) end
-                effect.beam = name
-            end
         end,
 
         ["battery-equipment"] = function(space, equipment)
