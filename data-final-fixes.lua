@@ -56,6 +56,14 @@ function This_MOD.start()
 
             --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
         end
+        for _, space in pairs(spaces) do
+            --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+            --- Corregir resultado de combustion
+            This_MOD.correction(space)
+
+            --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+        end
     end
 
     --- Fijar las posiciones actual
@@ -919,15 +927,7 @@ function This_MOD.create_item(space)
     if Item.fuel_value then
         local Value, Unit = GMOD.number_unit(Item.fuel_value)
         Item.fuel_value = Value * space.amount .. Unit
-
-        if Item.burnt_result then
-            for _, recipe in pairs(GMOD.recipes[Item.burnt_result]) do
-                if GMOD.has_id(recipe.name, d12b.category_undo) then
-                    Item.burnt_result = recipe.ingredients[1].name
-                    break
-                end
-            end
-        end
+        space.burnt_result = Item.burnt_result
     end
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -1287,6 +1287,34 @@ function This_MOD.create_tech(space)
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
     space.tech.research_trigger.item = space.name
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+end
+
+function This_MOD.correction(space)
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Validación
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    if not space.burnt_result then return end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Cambiar algunas propiedades
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    local Item = GMOD.items[space.name]
+    for _, recipe in pairs(GMOD.recipes[Item.burnt_result]) do
+        if GMOD.has_id(recipe.name, d12b.category_undo) then
+            Item.burnt_result = recipe.ingredients[1].name
+            break
+        end
+    end
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
