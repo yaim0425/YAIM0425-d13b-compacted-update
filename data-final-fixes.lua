@@ -756,11 +756,19 @@ function This_MOD.get_elements()
 
         if Item.place_as_equipment_result then
             for _, equipment in pairs(GMOD.equipments) do
-                if Item.place_as_equipment_result == equipment.name then
-                    if This_MOD.effect_to_type[equipment.type] then
-                        Space.equipment = equipment
+                repeat
+                    if Item.place_as_equipment_result ~= equipment.name then break end
+                    if not This_MOD.effect_to_type[equipment.type] then break end
+                    if not equipment.power then
+                        local energy = equipment.energy_source
+                        if energy and not energy.buffer_capacity then
+                            break
+                        end
                     end
-                end
+
+                    Space.equipment = equipment
+                until true
+                if Space.equipment then break end
             end
             if not Space.equipment then return end
         end
