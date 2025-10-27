@@ -202,6 +202,7 @@ function This_MOD.reference_values()
         ["construction-robot"] = function(space, entity)
             entity.speed = space.amount * entity.speed
             entity.max_payload_size = space.amount * entity.max_payload_size
+            entity.next_upgrade = nil
         end,
 
         ["electric-turret"] = function(space, entity)
@@ -337,6 +338,7 @@ function This_MOD.reference_values()
         ["logistic-robot"] = function(space, entity)
             entity.speed = space.amount * entity.speed
             entity.max_payload_size = space.amount * entity.max_payload_size
+            entity.next_upgrade = nil
         end,
 
         ["mining-drill"] = function(space, entity)
@@ -1187,6 +1189,7 @@ function This_MOD.create_entity(space)
 
         --- Cargar el objeto de referencia
         local Item = GMOD.items[entity]
+        if not Item then return end
 
         --- Nombre despues del aplicar el MOD
         local Name =
