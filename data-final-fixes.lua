@@ -540,12 +540,21 @@ function This_MOD.reference_values()
         end,
 
         ["module"] = function(space, item)
-            for key, _ in pairs(item.effect) do
-                if key ~= "pollution" or (key == "pollution" and item.effect[key] < 0) then
-                    item.effect[key] = space.amount * item.effect[key]
-                end
-                if item.effect[key] > 327 then item.effect[key] = 327 end
-                if item.effect[key] < -327 then item.effect[key] = -327 end
+            local Effects = {
+                ["productivity"] = function(value) return value < 0 end,
+                ["consumption"] = function(value) return value > 0 end,
+                ["pollution"] =  function(value) return value > 0 end,
+                ["quality"] =  function(value) return value < 0 end,
+                ["speed"] =  function(value) return value < 0 end,
+            }
+            for effect, _ in pairs(item.effect) do
+                repeat
+                    local Validate = Effects[effect]
+                    if Validate and Validate(item.effect[effect]) then break end
+                    item.effect[effect] = space.amount * item.effect[effect]
+                    if item.effect[effect] > 327 then item.effect[effect] = 327 end
+                    if item.effect[effect] < -327 then item.effect[effect] = -327 end
+                until true
             end
         end,
 
