@@ -51,8 +51,8 @@ function This_MOD.start()
             This_MOD.create_tile(space)
             This_MOD.create_equipment(space)
             This_MOD.create_entity(space)
-            This_MOD.create_recipe(space)
-            This_MOD.create_tech(space)
+            This_MOD.update_recipe(space)
+            This_MOD.update_tech(space)
 
             --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
         end
@@ -60,7 +60,7 @@ function This_MOD.start()
             --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
             --- Corregir resultado de combustion
-            This_MOD.correction(space)
+            This_MOD.update___burnt_result(space)
 
             --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
         end
@@ -540,12 +540,19 @@ function This_MOD.reference_values()
         end,
 
         ["module"] = function(space, item)
-            for key, _ in pairs(item.effect) do
-                if key ~= "pollution" or (key == "pollution" and item.effect[key] < 0) then
-                    item.effect[key] = space.amount * item.effect[key]
+            local Validate = {
+                ["productivity"] = function(value) return value > 0 end,
+                ["consumption"] = function(value) return value < 0 end,
+                ["pollution"] =  function(value) return value < 0 end,
+                ["quality"] =  function(value) return value > 0 end,
+                ["speed"] =  function(value) return value > 0 end
+            }
+            for effect, _ in pairs(item.effect) do
+                if Validate[effect](item.effect[effect]) then
+                    item.effect[effect] = space.amount * item.effect[effect]
+                    if item.effect[effect] > 327 then item.effect[effect] = 327 end
+                    if item.effect[effect] < -327 then item.effect[effect] = -327 end
                 end
-                if item.effect[key] > 327 then item.effect[key] = 327 end
-                if item.effect[key] < -327 then item.effect[key] = -327 end
             end
         end,
 
@@ -1245,7 +1252,7 @@ function This_MOD.create_entity(space)
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
 
-function This_MOD.create_recipe(space)
+function This_MOD.update_recipe(space)
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
     --- Validación
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -1272,7 +1279,7 @@ function This_MOD.create_recipe(space)
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
 
-function This_MOD.create_tech(space)
+function This_MOD.update_tech(space)
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
     --- Validación
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -1294,7 +1301,7 @@ function This_MOD.create_tech(space)
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
 
-function This_MOD.correction(space)
+function This_MOD.update___burnt_result(space)
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
     --- Validación
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
