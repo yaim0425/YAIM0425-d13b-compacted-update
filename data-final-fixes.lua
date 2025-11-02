@@ -125,6 +125,8 @@ function This_MOD.reference_values()
         ["se-energy-transmitter-emitter"] = true,
         ["se-energy-transmitter-injector"] = true,
         ["se-core-miner-drill"] = true,
+        ["se-energy-transmitter-chamber"] = true,
+        ["se-energy-receiver"] = true,
 
         ["se-delivery-cannon"] = true,
         ["se-spaceship-rocket-engine"] = true,
