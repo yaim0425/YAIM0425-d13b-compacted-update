@@ -32,7 +32,7 @@ GMOD[This_MOD.id] = This_MOD
 function This_MOD.start()
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
-    --- Iniciar el MOD d12b
+    --- Iniciar el MOD dependiente
     d12b.start()
 
     --- Valores de la referencia
