@@ -67,6 +67,9 @@ function This_MOD.start()
     end
 
     --- Fijar las posiciones actual
+    if GMOD.d01b then GMOD.d01b.start() end
+    if GMOD.d03b then GMOD.d03b.start() end
+    if GMOD.d04b then GMOD.d04b.start() end
     GMOD.d00b.change_orders()
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -545,9 +548,9 @@ function This_MOD.reference_values()
             local Validate = {
                 ["productivity"] = function(value) return value > 0 end,
                 ["consumption"] = function(value) return value < 0 end,
-                ["pollution"] =  function(value) return value < 0 end,
-                ["quality"] =  function(value) return value > 0 end,
-                ["speed"] =  function(value) return value > 0 end
+                ["pollution"] = function(value) return value < 0 end,
+                ["quality"] = function(value) return value > 0 end,
+                ["speed"] = function(value) return value > 0 end
             }
             for effect, _ in pairs(item.effect) do
                 if Validate[effect](item.effect[effect]) then
