@@ -759,6 +759,8 @@ function This_MOD.get_elements()
             Space.entity = GMOD.entities[Item.place_result]
             if not Space.entity then return end
             if This_MOD.ignore_to_name[Space.entity.name] then return end
+            if not Space.entity.minable then return end
+            if not Space.entity.minable.results then return end
 
             if Space.entity.type == "accumulator" then
                 if not Space.entity.energy_source then return end
