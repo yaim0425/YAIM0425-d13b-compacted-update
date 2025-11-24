@@ -67,6 +67,9 @@ function This_MOD.start()
     end
 
     --- Fijar las posiciones actual
+    if GMOD.d01b then GMOD.d01b.start() end
+    if GMOD.d03b then GMOD.d03b.start() end
+    if GMOD.d04b then GMOD.d04b.start() end
     GMOD.d00b.change_orders()
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -545,9 +548,9 @@ function This_MOD.reference_values()
             local Validate = {
                 ["productivity"] = function(value) return value > 0 end,
                 ["consumption"] = function(value) return value < 0 end,
-                ["pollution"] =  function(value) return value < 0 end,
-                ["quality"] =  function(value) return value > 0 end,
-                ["speed"] =  function(value) return value > 0 end
+                ["pollution"] = function(value) return value < 0 end,
+                ["quality"] = function(value) return value > 0 end,
+                ["speed"] = function(value) return value > 0 end
             }
             for effect, _ in pairs(item.effect) do
                 if Validate[effect](item.effect[effect]) then
@@ -756,6 +759,8 @@ function This_MOD.get_elements()
             Space.entity = GMOD.entities[Item.place_result]
             if not Space.entity then return end
             if This_MOD.ignore_to_name[Space.entity.name] then return end
+            if not Space.entity.minable then return end
+            if not Space.entity.minable.results then return end
 
             if Space.entity.type == "accumulator" then
                 if not Space.entity.energy_source then return end
