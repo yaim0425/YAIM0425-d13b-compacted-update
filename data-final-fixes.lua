@@ -147,14 +147,14 @@ function This_MOD.reference_values()
         --- Entities
         ["accumulator"] = function(space, entity)
             if not entity.energy_source then return end
-            local energy = entity.energy_source
+            local Energy = entity.energy_source
             for _, propiety in pairs({
                 "buffer_capacity",
                 "input_flow_limit",
                 "output_flow_limit"
             }) do
-                local Value, Unit = GMOD.number_unit(energy[propiety])
-                energy[propiety] = (space.amount * Value) .. Unit
+                local Value, Unit = GMOD.number_unit(Energy[propiety])
+                Energy[propiety] = (space.amount * Value) .. Unit
             end
         end,
 
@@ -181,11 +181,11 @@ function This_MOD.reference_values()
 
         ["boiler"] = function(space, entity)
             --- Renombrar
-            local energy = entity.energy_source
+            local Energy = entity.energy_source
 
             --- Para los que usan combustible
-            if energy.type == "burner" then
-                energy.effectivity = space.amount * (energy.effectivity or 1)
+            if Energy.type == "burner" then
+                Energy.effectivity = space.amount * (Energy.effectivity or 1)
             end
 
             --- Velocidad de calentamiento
@@ -216,9 +216,9 @@ function This_MOD.reference_values()
             entity.preparing_speed = space.amount * entity.preparing_speed
 
             --- Daño directo
-            local damages = GMOD.get_tables(entity.attack_parameters, "type", "damage")
-            for _, element in pairs(damages or {}) do
-                if element.damages.amount then
+            local Damages = GMOD.get_tables(entity.attack_parameters, "type", "damage")
+            for _, element in pairs(Damages or {}) do
+                if element.damage.amount then
                     element.damage.amount = space.amount * element.damage.amount
                 end
             end
@@ -280,11 +280,11 @@ function This_MOD.reference_values()
 
         ["furnace"] = function(space, entity)
             --- Renombrar
-            local energy = entity.energy_source
+            local Energy = entity.energy_source
 
             --- Usar menos combustible
-            if energy.type == "burner" then
-                energy.effectivity = space.amount * (energy.effectivity or 1)
+            if Energy.type == "burner" then
+                Energy.effectivity = space.amount * (Energy.effectivity or 1)
             end
 
             --- Aumnetar la velocidad de fabricación
@@ -329,9 +329,9 @@ function This_MOD.reference_values()
         ["locomotive"] = function(space, entity)
             entity.max_speed = space.amount * entity.max_speed
 
-            local energy = entity.energy_source
-            if energy and energy.type == "burner" then
-                energy.effectivity = space.amount * (energy.effectivity or 1)
+            local Energy = entity.energy_source
+            if Energy and Energy.type == "burner" then
+                Energy.effectivity = space.amount * (Energy.effectivity or 1)
             end
 
             if entity.max_power then
@@ -348,9 +348,9 @@ function This_MOD.reference_values()
 
         ["mining-drill"] = function(space, entity)
             if not entity.energy_source then return end
-            local energy = entity.energy_source
-            if energy.type == "burner" then
-                energy.effectivity = space.amount * (energy.effectivity or 1)
+            local Energy = entity.energy_source
+            if Energy.type == "burner" then
+                Energy.effectivity = space.amount * (Energy.effectivity or 1)
             end
             entity.mining_speed = space.amount * entity.mining_speed
         end,
@@ -369,8 +369,8 @@ function This_MOD.reference_values()
         ["pipe-to-ground"] = function(space, entity)
             if not entity.fluid_box then return end
             if not entity.fluid_box.pipe_connections then return end
-            local pipe_connections = entity.fluid_box.pipe_connections
-            for _, value in pairs(pipe_connections) do
+            local Pipe_connections = entity.fluid_box.pipe_connections
+            for _, value in pairs(Pipe_connections) do
                 if value.max_underground_distance then
                     value.max_underground_distance =
                         space.amount * value.max_underground_distance
@@ -393,9 +393,9 @@ function This_MOD.reference_values()
         end,
 
         ["reactor"] = function(space, entity)
-            local energy = entity.energy_source
-            if energy.type ~= "burner" then return end
-            energy.effectivity = space.amount * (energy.effectivity or 1)
+            local Energy = entity.energy_source
+            if Energy.type ~= "burner" then return end
+            Energy.effectivity = space.amount * (Energy.effectivity or 1)
         end,
 
         ["solar-panel"] = function(space, entity)
@@ -776,6 +776,8 @@ function This_MOD.get_elements()
         if Item.place_as_tile then
             Space.tiles = GMOD.tiles[Item.name]
             if not Space.tiles then return end
+            if not Space.tiles.minable then return end
+            if not Space.tiles.minable.results then return end
         end
 
         if Item.place_as_equipment_result then
@@ -784,8 +786,8 @@ function This_MOD.get_elements()
                     if Item.place_as_equipment_result ~= equipment.name then break end
                     if not This_MOD.effect_to_type[equipment.type] then break end
                     if not equipment.power then
-                        local energy = equipment.energy_source
-                        if energy and not energy.buffer_capacity then
+                        local Energy = equipment.energy_source
+                        if Energy and not Energy.buffer_capacity then
                             break
                         end
                     end
